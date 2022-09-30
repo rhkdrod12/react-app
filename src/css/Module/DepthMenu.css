@@ -1,0 +1,132 @@
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+.menu-container {
+    display: grid;
+    grid-auto-flow: column;
+    justify-content: start;
+    width: 100%;
+    position: relative;
+    z-index: 99;
+}
+
+.main-menu {
+    height: fit-content;
+}
+
+.main-menu-container {
+    display: grid;
+    grid-auto-flow: row;
+    grid-template-rows: 90% 10%;
+    width: 150px;
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
+    transition: 0.5s;
+    transition-timing-function: ease;
+
+}
+
+.main-menu-name {
+    color: rgb(74, 83, 94);
+    font-weight: 700;
+    /* padding: 15px 0px 5px 0px; */
+}
+
+.main-menu-bar {
+    height: 5px;
+    border-radius: 10px;
+    width: 60%;
+    height: 100%;
+    max-height: 5px;
+
+    opacity: 0;
+    background: transparent;
+    transform: translateY(0%);
+    transition: all 0.2s ease;
+}
+
+.main-menu-over {
+    color: white;
+    font-weight: 900;
+    /*background-color: rgb(161, 161, 161);*/
+}
+
+.main-menu-over .main-menu-bar {
+    opacity: 1;
+    min-width: 50px;
+    background: rgb(104, 161, 234);
+    transform: translateY(-120%);
+    transition: all 0.5s ease;
+}
+.menu-on {
+    animation: moveMenu 1s ease-in-out 0s 1 normal forwards;
+}
+@keyframes moveMenu {
+    from {
+        background: rgb(145, 145, 145);
+        width: 60%;
+        transform: translateY(0);
+    }
+    to {
+        background: rgb(247, 255, 137);
+        width: 60%;
+        transform: translateY(-10px);
+    }
+}
+
+.menu-content {
+    display: inline-flex;
+    cursor: pointer;
+    position: relative;
+}
+
+.menu-name {
+    /* height: 30px; */
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.menu-over {
+    color: white;
+    background-color: rgb(214, 214, 214);
+    cursor: pointer;
+}
+
+.sub-down-menu-container {
+    position: absolute;
+    background: rgba(250, 250, 250, 1);
+    display: flex;
+    flex-direction: column;
+    width: max-content;
+    border: 1px solid rgb(161, 161, 161);
+}
+
+.sub-side-menu-container {
+    position: absolute;
+    background: rgba(250, 250, 250, 1);
+    display: flex;
+    flex-direction: column;
+    width: max-content;
+    border: 1px solid rgb(161, 161, 161);
+}
+
+.sub-menu-name {
+    width: 100%;
+    border-bottom: 1px solid rgb(161, 161, 161);
+}
+
+.sub-down-menu-container:last-child {
+    border-bottom: 0;
+}
+.sub-side-menu-container:last-child {
+    border-bottom: 0;
+}
