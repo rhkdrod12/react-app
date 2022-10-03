@@ -1,18 +1,145 @@
 import axios from "axios";
-import { Observable } from "rxjs";
+import { config, Observable } from "rxjs";
 import { useEffect, useState } from "react";
 import queryString from "query-string";
 import { COM_MESSAGE } from "../utils/commonMessage";
 import JSOG from "jsog";
+import COM from "../utils/System.js";
+import { useLocation, useNavigate } from "react-router-dom";
 
-export const DEFAULT_URL = "http://192.168.10.79:8080";
+export const DEFAULT_URL = "http://127.0.0.1:8080";
+
+/**
+ * token 저장용 클래스
+ */
+class AuthToken {
+  #accessToken;
+  #refreshToken;
+
+  constructor(accessToken, refreshToken) {
+    this.#accessToken = accessToken;
+    this.#refreshToken = refreshToken;
+  }
+  get accessToken() {
+    return this.#accessToken;
+  }
+  set accessToken(accessToken) {
+    this.#accessToken = accessToken;
+  }
+  get refreshToken() {
+    return this.#refreshToken;
+  }
+  set refreshToken(refreshToken) {
+    this.#refreshToken = refreshToken;
+  }
+}
+
+const Auth = {
+  token: null,
+};
 
 // 자격 필요로 설정
-axios.defaults.withCredentials = true;
-// 인터셉터
-axios.interceptors.request.use((config) => {
-  return config;
+
+const axiosInstance = axios.create({
+  timeout: COM.TIME_OUT,
+  withCredentials: true,
 });
+
+// axios.defaults.withCredentials = true;
+// axios.interceptors.request.use(
+//   (config) => {
+//     return config;
+//   },
+//   (error) => {
+//     console.log("에러에러");
+//     return Promise.reject(error);
+//   }
+// );
+
+const cancelPromise = () => {
+  let promise = new Promise(() => {});
+  return promise;
+};
+
+export const AxiosInterceptor = ({ children }) => {
+  console.log("interceptor 동작1");
+
+  const navi = useNavigate();
+  // 기본 설정 지정
+  const inter = axiosRsInterceptor(navi);
+
+  // useEffect로 한번만 동작하도록
+  useEffect(() => {
+    //axiosRsInterceptor(navi);
+    return () => {
+      axiosInstance.interceptors.response.eject(inter);
+    };
+  }, []);
+
+  return children;
+};
+
+// axios 인터셉터 설정
+const axiosRsInterceptor = (navigate) => {
+  return axiosInstance.interceptors.response.use(
+    (response) => {
+      return response;
+    },
+    (error) => {
+      const errorResult = axiosError(error);
+      console.log();
+      // 미인증 상태
+      if (errorResult.resultCode == COM_MESSAGE.UNAUTHORIZED.resultCode) {
+        // 로그인 요청 화면 또는 거부 화면처리
+        console.log("미인증 상태");
+        // 엑세스 토큰 삭제
+        sessionStorage.removeItem(COM.ACCESS_TOKEN);
+        // 리플래쉬 토큰 삭제
+        sessionStorage.removeItem(COM.REFRESH_TOKEN);
+
+        navigate("/user/login", {
+          state: {
+            movePath: location.pathname,
+          },
+        });
+        return cancelPromise();
+      }
+      // 토큰 만료 상태 - refreshToken으로 재요청
+      else if (
+        errorResult.resultCode == COM_MESSAGE.EXPIRE_AUTHORIZED.resultCode
+      ) {
+        // 토큰 갱신 요청, refreshToken이 있는 경우에만
+        console.log("토큰 갱신 요청 필요");
+        // 엑세스 토큰 삭제 - 갱신은 요청하더라도 일단 액세스 토큰은 삭제처리
+        sessionStorage.removeItem(COM.ACCESS_TOKEN);
+        return Promise.reject(error);
+      }
+      // 그냥 에러
+      else {
+        return Promise.reject(error);
+      }
+    }
+  );
+};
+
+export const authorization = ({ accessToken, refreshToken }) => {
+  // 토큰 임시 저장
+  Auth.token = new AuthToken(accessToken, refreshToken);
+  // 헤더에 Authorization 항목으로 accessToken 지정
+  axiosInstance.defaults.headers.common["Authorization"] = accessToken;
+};
+
+export const AxiosInterceptors = () => {
+  const axiosInterceptor = axiosInstance.interceptors.response.use(
+    (response) => {
+      return response;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
+  return axiosInterceptor;
+};
 
 /**
  * URL에 파라미터를 주입
@@ -21,7 +148,9 @@ axios.interceptors.request.use((config) => {
  * @returns
  */
 export const makeGetParam = (url, param) => {
-  return param && param instanceof Object ? url + "?" + queryString.stringify(param) : url;
+  return param && param instanceof Object
+    ? url + "?" + queryString.stringify(param)
+    : url;
 };
 
 /**
@@ -30,7 +159,11 @@ export const makeGetParam = (url, param) => {
  * @param {Object} param1 요청할 파라미터
  * @returns
  */
-export const useGetFetch = (url, { stateType = [], param } = {}, callbackFunc) => {
+export const useGetFetch = (
+  url,
+  { stateType = [], param } = {},
+  callbackFunc
+) => {
   const [responseData, setResponseData] = useState(stateType);
   url = DEFAULT_URL + url;
 
@@ -38,7 +171,7 @@ export const useGetFetch = (url, { stateType = [], param } = {}, callbackFunc) =
     // 파라미터 삽입
     url = makeGetParam(url, param);
 
-    axios
+    axiosInstance
       .get(url)
       .then((res) => {
         const result = JSOG.parse(res.request.response).result;
@@ -59,7 +192,7 @@ export function usePostFetch(url, data, stateType = []) {
   const [responseData, setResponseData] = useState(stateType);
   url = DEFAULT_URL + url;
   useEffect(() => {
-    axios
+    axiosInstance
       .post(url, data)
       .then((res) => {
         let {
@@ -82,7 +215,7 @@ export function getFetch(url, param, callback) {
   }
 
   return new Promise((resolve, reject) => {
-    axios
+    axiosInstance
       .get(url)
       .then((res) => {
         resolve(JSOG.parse(res.request.response).result, res);
@@ -94,22 +227,38 @@ export function getFetch(url, param, callback) {
   });
 }
 
-export function postFetch(url, data, callback) {
+export function formFetch(url, data) {
   url = DEFAULT_URL + url;
   return new Promise((resolve, reject) => {
-    axios
+    axiosInstance
+      .post(url, makeFormData(data), {
+        headers: { "Content-type": "multipart/form-data" },
+      })
+      .then((res) => {
+        const result = JSOG.parse(res.request.response).result;
+        resolve(result);
+      })
+      .catch((error) => {
+        reject(axiosError(error));
+      });
+  });
+}
+
+export function postFetch(url, data) {
+  url = DEFAULT_URL + url;
+
+  return new Promise((resolve, reject) => {
+    axiosInstance
       .post(url, data)
       .then((res) => {
-        let {
-          data: { message },
-        } = res;
-        resolve(message);
+        const result = JSOG.parse(res.request.response).result;
+        resolve(result);
       })
       .catch((e) => {
         const { message, code } = e;
         console.log(e);
         console.log(`Messgae: ${message}\nCode: ${code}`);
-        reject();
+        reject(axiosError(error));
       });
   });
 }
@@ -146,7 +295,7 @@ const axiosError = (error) => {
 export function rxJsPost(url, data) {
   url = DEFAULT_URL + url;
   return new Observable((observer) => {
-    axios
+    axiosInstance
       .post(url, data)
       .then(({ data }) => {
         observer.next(data);
@@ -170,7 +319,8 @@ export function fileRxjsUpload(url, fileInfo, onUploadProgress) {
   // 객체를 fromData 형태로 가공
   const formData = makeFormData(fileInfo, ["axiosSource"]);
 
-  fileInfo.axiosSource = fileInfo.axiosSource ??= axios.CancelToken.source();
+  fileInfo.axiosSource = fileInfo.axiosSource ??=
+    axiosInstance.CancelToken.source();
 
   const option = {
     url: url, // 파일 다운로드 요청 URL
@@ -184,7 +334,7 @@ export function fileRxjsUpload(url, fileInfo, onUploadProgress) {
   };
 
   return new Observable((observer) => {
-    axios(option)
+    axiosInstance(option)
       .then((response) => {
         observer.next(response.data);
         observer.complete();
@@ -197,7 +347,7 @@ export function fileRxjsUpload(url, fileInfo, onUploadProgress) {
 
 /**
  *
- * @param {s} observer
+ * @param {*} observer
  * @param {*} error
  */
 const axiosRxJsError = (observer, error) => {
@@ -246,14 +396,18 @@ export function fileDownload(url, param, onDownloadProgress) {
     };
     // 서버에서 받은 데이터는 바이너리 형태의 데이터가 됨
     // 따라서 이 것을 blod로 변환한다음 다운로드를 실시함?
-    axios(option)
+    axiosInstance(option)
       .then((response) => {
         const blob = new Blob([response.data]); // blob을 사용해 객체 URL을 생성합니다.
         const fileObjectUrl = window.URL.createObjectURL(blob); // blob 객체 URL을 설정할 링크를 만듭니다.
 
         const extractDownloadFilename = (response) => {
           const disposition = response.headers["content-disposition"];
-          const fileName = decodeURI(disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)[1].replace(/['"]/g, ""));
+          const fileName = decodeURI(
+            disposition
+              .match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)[1]
+              .replace(/['"]/g, "")
+          );
           return fileName;
         }; // 다운로드 파일의 이름은 직접 지정 할 수 있습니다. // link.download = "sample-file.xlsx"; // 링크를 body에 추가하고 강제로 click 이벤트를 발생시켜 파일 다운로드를 실행시킵니다.
 
@@ -276,7 +430,7 @@ export function fileDownload(url, param, onDownloadProgress) {
         const { message, code } = e;
         console.log(e);
         console.log(`Messgae: ${message}\nCode: ${code}`);
-        reject();
+        reject(axiosError(e));
       });
   });
 }

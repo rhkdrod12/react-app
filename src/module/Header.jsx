@@ -1,12 +1,17 @@
-import { MenuList } from "@mui/material";
+import { Button, MenuList } from "@mui/material";
 import React from "react";
 import styled from "styled-components";
 import { StyleDiv, StyleHeader } from "./StyleComp/StyleComp.jsx";
 import HeaderMenu from "./ModuleComp/HeaderMenu.jsx";
 import { useNavigate } from "react-router-dom";
+import COM from "../utils/System.js";
+import axios from "axios";
 
 const Header = ({ height = 50 }) => {
   const navi = useNavigate();
+
+  const accessToken = sessionStorage.getItem(COM.ACCESS_TOKEN);
+
   return (
     <HeaderWrap inStyle={{ height }} classNamme="main-header">
       {/* 왼쪽 항목*/}
@@ -29,14 +34,53 @@ const Header = ({ height = 50 }) => {
       <StyleDiv
         inStyle={{
           padding: "0px 10px 0px 10px",
-          width: 100,
+          width: 150,
           display: "flex",
           justifyContent: "center",
         }}
       >
-        {/* <LoginBtn /> */}
+        {accessToken ? <LogoutBtn /> : <LoginBtn />}
       </StyleDiv>
     </HeaderWrap>
+  );
+};
+
+/**
+ * 로그인 버튼
+ * @returns {JSX.Element}
+ * @constructor
+ */
+const LoginBtn = () => {
+  const navi = useNavigate();
+  return (
+    <Button
+      variant="contained"
+      color="primary"
+      onClick={() => navi("/user/login")}
+    >
+      로그인
+    </Button>
+  );
+};
+
+/**
+ * 로그아웃 버튼
+ * @returns {JSX.Element}
+ * @constructor
+ */
+const LogoutBtn = () => {
+  const navigate = useNavigate();
+  const onLogout = () => {
+    sessionStorage.removeItem(COM.ACCESS_TOKEN);
+
+    delete axios.defaults.headers.common["Authorization"];
+
+    navigate("/");
+  };
+  return (
+    <Button variant="contained" color="secondary" onClick={onLogout}>
+      로그아웃
+    </Button>
   );
 };
 

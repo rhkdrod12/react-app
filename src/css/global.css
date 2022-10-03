@@ -42,7 +42,9 @@
   display: grid;
   grid-template-rows: 50px auto 50px;
 }
+.main-content{
 
+}
 .main-footer {
   justify-self: center;
   align-self: center;

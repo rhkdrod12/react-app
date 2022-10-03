@@ -11,7 +11,7 @@ const Footer = () => {
 
   return (
     <footer className="main-footer">
-      Make Test Page<br></br>
+      Make Test Page 2022-09-30<br></br>
       {nowDate}
     </footer>
   );
