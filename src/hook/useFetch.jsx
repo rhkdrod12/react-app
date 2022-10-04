@@ -1,11 +1,10 @@
 import axios from "axios";
-import { config, Observable } from "rxjs";
+import { Observable } from "rxjs";
 import { useEffect, useState } from "react";
 import queryString from "query-string";
 import { COM_MESSAGE } from "../utils/commonMessage";
 import JSOG from "jsog";
 import COM from "../utils/System.js";
-import { useLocation, useNavigate } from "react-router-dom";
 
 export const DEFAULT_URL = "http://127.0.0.1:8080";
 
@@ -16,19 +15,7 @@ export const axiosInstance = axios.create({
 });
 
 /**
- * URL에 파라미터를 주입
- * @param {String} url
- * @param {Object} param
- * @returns
- */
-export const makeGetParam = (url, param) => {
-  return param && param instanceof Object
-    ? url + "?" + queryString.stringify(param)
-    : url;
-};
-
-/**
- * 입력한 URL에 param를 포함하여 GET요청을 보냄
+ * 입력한 URL에 param를 포함하여 GET요청을 보냄 (useState로 받음, 에러처리가 어려움)
  * @param {String} url 요청할 URL
  * @param {Object} param1 요청할 파라미터
  * @returns
@@ -62,6 +49,13 @@ export const useGetFetch = (
   return [responseData, setResponseData];
 };
 
+/**
+ * 데이터를 요청하여 이를 useState로 받음, 에러처리를 하지 않기 때문에 잘해야함
+ * @param url
+ * @param data
+ * @param stateType
+ * @returns {(*[]|((value: (((prevState: *[]) => *[]) | *[])) => void))[]}
+ */
 export function usePostFetch(url, data, stateType = []) {
   const [responseData, setResponseData] = useState(stateType);
   url = DEFAULT_URL + url;
@@ -82,6 +76,13 @@ export function usePostFetch(url, data, stateType = []) {
   return [responseData, setResponseData];
 }
 
+/**
+ * url에 param을 get형태로 전송 또는 요청
+ * @param url
+ * @param param
+ * @param callback
+ * @returns {Promise<unknown>}
+ */
 export function getFetch(url, param, callback) {
   url = DEFAULT_URL + url;
   if (param && param instanceof Object) {
@@ -101,6 +102,12 @@ export function getFetch(url, param, callback) {
   });
 }
 
+/**
+ * url로 param을 formData형태로 전송
+ * @param url
+ * @param data
+ * @returns {Promise<unknown>}
+ */
 export function formFetch(url, data) {
   url = DEFAULT_URL + url;
   return new Promise((resolve, reject) => {
@@ -195,14 +202,13 @@ export function fileRxjsUpload(url, fileInfo, onUploadProgress) {
   });
 }
 
-const makeFormData = function (arg, exclude = []) {
-  const formData = new FormData();
-  for (const key in arg) {
-    if (!exclude.includes(key)) formData.append(key, arg[key]);
-  }
-  return formData;
-};
-
+/**
+ * 파일 다운로드관련 패치
+ * @param url
+ * @param param
+ * @param onDownloadProgress
+ * @returns {Promise<unknown>}
+ */
 export function fileDownload(url, param, onDownloadProgress) {
   url = DEFAULT_URL + url;
 
@@ -257,6 +263,33 @@ export function fileDownload(url, param, onDownloadProgress) {
       });
   });
 }
+
+/**
+ * param을 formData로 변환
+ * @param arg
+ * @param exclude
+ * @returns {FormData}
+ */
+export const makeFormData = function (arg, exclude = []) {
+  const formData = new FormData();
+  for (const key in arg) {
+    if (!exclude.includes(key)) formData.append(key, arg[key]);
+  }
+  return formData;
+};
+
+/**
+ * URL에 파라미터를 주입
+ * @param {String} url
+ * @param {Object} param
+ * @returns
+ */
+export const makeGetParam = (url, param) => {
+  return param && param instanceof Object
+    ? url + "?" + queryString.stringify(param)
+    : url;
+};
+
 /***************************** 에러 메시지 관련  ****************************/
 /**
  * rxJx의 axios에 의해 발생하는 에러메시지 처리
