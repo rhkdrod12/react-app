@@ -1,9 +1,9 @@
 import React, { useCallback, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { authorization, formFetch } from "../../hook/useFetch.jsx";
+import { formFetch } from "../../hook/useFetch.jsx";
 import { Button, createTheme, TextField, ThemeProvider } from "@mui/material";
 import styled from "styled-components";
-import COM from "../../utils/System.js";
+import { Authorization } from "../../utils/authorization.jsx";
 
 /**
  * 로그인 관련 컴포넌트
@@ -23,7 +23,9 @@ const Login = () => {
         formFetch("/login", value)
           .then((res) => {
             // 인증 셋!
-            authorization(res);
+            // authorization(res);
+            Authorization.setToken(res);
+
             // 메인으로 이동
             console.log("메인으로 이동 %o", movePath);
 

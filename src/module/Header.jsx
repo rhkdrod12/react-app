@@ -6,6 +6,7 @@ import HeaderMenu from "./ModuleComp/HeaderMenu.jsx";
 import { useNavigate } from "react-router-dom";
 import COM from "../utils/System.js";
 import axios from "axios";
+import { Authorization } from "../utils/authorization.jsx";
 
 const Header = ({ height = 50 }) => {
   const navi = useNavigate();
@@ -71,10 +72,9 @@ const LoginBtn = () => {
 const LogoutBtn = () => {
   const navigate = useNavigate();
   const onLogout = () => {
-    sessionStorage.removeItem(COM.ACCESS_TOKEN);
-
-    delete axios.defaults.headers.common["Authorization"];
-
+    // 인증토큰 삭제
+    Authorization.deleteToken();
+    // 홈으로 이동
     navigate("/");
   };
   return (
