@@ -23,12 +23,10 @@ const Login = () => {
         formFetch("/login", value)
           .then((res) => {
             // 인증 셋!
-            // authorization(res);
             Authorization.setToken(res);
 
             // 메인으로 이동
             console.log("메인으로 이동 %o", movePath);
-
             navi(movePath);
           })
           .catch((reason) => {
