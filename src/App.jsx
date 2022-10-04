@@ -2,8 +2,8 @@ import Content from "./module/Content";
 import Footer from "./module/Footer";
 import Header from "./module/Header.jsx";
 import { BrowserRouter } from "react-router-dom";
-import { AxiosInterceptor } from "./hook/useFetch.jsx";
 import { ModalProvider } from "./utils/ModalContext.jsx";
+import { AxiosInterceptor } from "./utils/authorization";
 
 function App() {
   return (
