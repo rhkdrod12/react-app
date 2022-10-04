@@ -138,30 +138,6 @@ export function postFetch(url, data) {
 }
 
 /**
- * axios 통신시 발생하는 에러메시지 처리
- * @param {*} error
- */
-const axiosError = (error) => {
-  if (error.code) {
-    if (error.name == "AxiosError") {
-      if (error.code == "ERR_NETWORK") {
-        return { result: false, ...COM_MESSAGE.ERR_NETWORK };
-      } else if (error.code == "ERR_BAD_RESPONSE") {
-        return error.response.data;
-      } else if (error.code == "ERR_BAD_REQUEST") {
-        return error.response.data;
-      } else {
-        return { result: false, ...COM_MESSAGE.ERR };
-      }
-    } else if (error.name == "CanceledError") {
-      if (error.code == "ERR_CANCELED") {
-        return { result: false, ...COM_MESSAGE.CANCEL_REQUEST };
-      }
-    }
-  }
-};
-
-/**
  * URL에 BODY에 데이터를 포함하여 POST요청을 한다.
  * @param {String} url
  * @param {Object} data
@@ -218,33 +194,6 @@ export function fileRxjsUpload(url, fileInfo, onUploadProgress) {
       });
   });
 }
-
-/**
- *
- * @param {*} observer
- * @param {*} error
- */
-const axiosRxJsError = (observer, error) => {
-  if (error.code) {
-    if (error.name == "AxiosError") {
-      if (error.code == "ERR_NETWORK") {
-        observer.error({ result: false, ...COM_MESSAGE.ERR_NETWORK });
-      } else if (error.code == "ERR_BAD_RESPONSE") {
-        observer.error(error.response.data);
-      } else if (error.code == "ERR_BAD_REQUEST") {
-        observer.error(error.response.data);
-      } else {
-        observer.error({ result: false, ...COM_MESSAGE.ERR });
-      }
-    } else if (error.name == "CanceledError") {
-      if (error.code == "ERR_CANCELED") {
-        observer.error({ result: false, ...COM_MESSAGE.CANCEL_REQUEST });
-      }
-    }
-  }
-};
-
-export const rxJsErrorResult = (object) => {};
 
 const makeFormData = function (arg, exclude = []) {
   const formData = new FormData();
@@ -308,3 +257,53 @@ export function fileDownload(url, param, onDownloadProgress) {
       });
   });
 }
+/***************************** 에러 메시지 관련  ****************************/
+/**
+ * rxJx의 axios에 의해 발생하는 에러메시지 처리
+ * @param {*} observer
+ * @param {*} error
+ */
+export const axiosRxJsError = (observer, error) => {
+  if (error.code) {
+    if (error.name == "AxiosError") {
+      if (error.code == "ERR_NETWORK") {
+        observer.error({ result: false, ...COM_MESSAGE.ERR_NETWORK });
+      } else if (error.code == "ERR_BAD_RESPONSE") {
+        observer.error(error.response.data);
+      } else if (error.code == "ERR_BAD_REQUEST") {
+        observer.error(error.response.data);
+      } else {
+        observer.error({ result: false, ...COM_MESSAGE.ERR });
+      }
+    } else if (error.name == "CanceledError") {
+      if (error.code == "ERR_CANCELED") {
+        observer.error({ result: false, ...COM_MESSAGE.CANCEL_REQUEST });
+      }
+    }
+  }
+};
+
+/**
+ * axios 통신시 발생하는 에러메시지 처리
+ * @param {*} error
+ */
+export const axiosError = (error) => {
+  if (error.code) {
+    if (error.name == "AxiosError") {
+      if (error.code == "ERR_NETWORK") {
+        return { result: false, ...COM_MESSAGE.ERR_NETWORK };
+      } else if (error.code == "ERR_BAD_RESPONSE") {
+        return error.response.data;
+      } else if (error.code == "ERR_BAD_REQUEST") {
+        return error.response.data;
+      } else {
+        return { result: false, ...COM_MESSAGE.ERR };
+      }
+    } else if (error.name == "CanceledError") {
+      if (error.code == "ERR_CANCELED") {
+        return { result: false, ...COM_MESSAGE.CANCEL_REQUEST };
+      }
+    }
+  }
+};
+/***************************** ********* ****************************/

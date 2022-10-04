@@ -1,7 +1,7 @@
 import COM from "./System.js";
 import { COM_MESSAGE } from "./commonMessage.js";
 import { useNavigate } from "react-router-dom";
-import { axiosInstance } from "../hook/useFetch.jsx";
+import { axiosError, axiosInstance } from "../hook/useFetch.jsx";
 
 export class Authorization {
   /**
@@ -91,7 +91,6 @@ const axiosRsInterceptor = (navigate) => {
     },
     (error) => {
       const errorResult = axiosError(error);
-      console.log();
       // 미인증 상태
       if (errorResult.resultCode == COM_MESSAGE.UNAUTHORIZED.resultCode) {
         // 로그인 요청 화면 또는 거부 화면처리
