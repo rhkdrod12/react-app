@@ -9,16 +9,24 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 export const DEFAULT_URL = "http://127.0.0.1:8080";
 
+// axios instance를 만들어서 config 설정
+const axiosInstance = axios.create({
+  timeout: COM.TIME_OUT,
+  withCredentials: true,
+});
+
 /**
  * token 저장용 클래스
  */
 class AuthToken {
+  #axiosInstance;
   #accessToken;
   #refreshToken;
 
-  constructor(accessToken, refreshToken) {
-    this.#accessToken = accessToken;
-    this.#refreshToken = refreshToken;
+  constructor(axiosInstance) {
+    this.#axiosInstance = axiosInstance;
+    // this.#accessToken = accessToken;
+    // this.#refreshToken = refreshToken;
   }
   get accessToken() {
     return this.#accessToken;
@@ -34,28 +42,6 @@ class AuthToken {
   }
 }
 
-const Auth = {
-  token: null,
-};
-
-// 자격 필요로 설정
-
-const axiosInstance = axios.create({
-  timeout: COM.TIME_OUT,
-  withCredentials: true,
-});
-
-// axios.defaults.withCredentials = true;
-// axios.interceptors.request.use(
-//   (config) => {
-//     return config;
-//   },
-//   (error) => {
-//     console.log("에러에러");
-//     return Promise.reject(error);
-//   }
-// );
-
 const cancelPromise = () => {
   let promise = new Promise(() => {});
   return promise;
@@ -68,18 +54,14 @@ export const AxiosInterceptor = ({ children }) => {
   // 기본 설정 지정
   const inter = axiosRsInterceptor(navi);
 
-  // useEffect로 한번만 동작하도록
-  useEffect(() => {
-    //axiosRsInterceptor(navi);
-    return () => {
-      axiosInstance.interceptors.response.eject(inter);
-    };
-  }, []);
-
   return children;
 };
 
-// axios 인터셉터 설정
+/**
+ * axios Interceptor 설정
+ * @param navigate
+ * @returns {number}
+ */
 const axiosRsInterceptor = (navigate) => {
   return axiosInstance.interceptors.response.use(
     (response) => {
@@ -122,9 +104,16 @@ const axiosRsInterceptor = (navigate) => {
   );
 };
 
+/**
+ * 데이터 통신이 인증 헤더 추가
+ * @param accessToken
+ * @param refreshToken
+ */
 export const authorization = ({ accessToken, refreshToken }) => {
-  // 토큰 임시 저장
-  Auth.token = new AuthToken(accessToken, refreshToken);
+  // 인증 토큰 셋
+  sessionStorage.setItem(COM.ACCESS_TOKEN, accessToken);
+  // 갱신 토큰 셋
+  sessionStorage.setItem(COM.REFRESH_TOKEN, refreshToken);
   // 헤더에 Authorization 항목으로 accessToken 지정
   axiosInstance.defaults.headers.common["Authorization"] = accessToken;
 };

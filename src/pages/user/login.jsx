@@ -22,10 +22,6 @@ const Login = () => {
       setFormValue((value) => {
         formFetch("/login", value)
           .then((res) => {
-            // 인증 토큰 셋
-            sessionStorage.setItem(COM.ACCESS_TOKEN, res.accessToken);
-            // 갱신 토큰 셋
-            sessionStorage.setItem(COM.REFRESH_TOKEN, res.refreshToken);
             // 인증 셋!
             authorization(res);
             // 메인으로 이동
