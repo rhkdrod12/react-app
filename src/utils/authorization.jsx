@@ -94,7 +94,7 @@ const axiosRsInterceptor = (navigate) => {
       // 미인증 상태
       if (errorResult.resultCode == COM_MESSAGE.UNAUTHORIZED.resultCode) {
         // 로그인 요청 화면 또는 거부 화면처리
-        console.log("미인증 상태");
+        console.log("미인증 상태 %o", location.pathname);
         // 엑세스 토큰 삭제
         sessionStorage.removeItem(COM.ACCESS_TOKEN);
         // 리플래쉬 토큰 삭제

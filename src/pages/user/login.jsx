@@ -8,13 +8,14 @@ import { enterEvent } from "../../utils/defaultKepEvent.jsx";
 import { Authorization } from "../../utils/authorization.jsx";
 import useReset from "../../hook/useReset.jsx";
 
+const initFormValue = { username: "", passward: "" };
 /**
  * 로그인 관련 컴포넌트
  * @returns {JSX.Element}
  * @constructor
  */
 const Login = () => {
-  const [formValue, setFormValue] = useState({ username: "", passward: "" });
+  const [formValue, setFormValue] = useState({ ...initFormValue });
   const [loading, setLoading] = useState(false);
 
   const navi = useNavigate();
@@ -22,11 +23,11 @@ const Login = () => {
   const btnRef = useRef();
   const formRef = useRef();
 
-  // useReset(() => {
-  //   console.log("useEffect3 동작");
-  //   setFormValue({ username: "", passward: "" });
-  //   setLoading(false);
-  // });
+  // 초기화
+  useReset(() => {
+    setFormValue({ ...initFormValue });
+    setLoading(false);
+  });
 
   console.log("state: %o", movePath);
 
