@@ -1,5 +1,11 @@
 import axios from "axios";
 
+// const randomSource = require("randomstring");
+
+// export const randomString = (length) => {
+//   return randomSource.generate(length);
+// };
+
 /**
  * 입력받은 css값에 숫자형태이면 px를 붙이는 용도
  * @param {*} val
@@ -66,12 +72,18 @@ export const calmelToSnake = (val) => {
  * @param {*} param3
  * @returns
  */
-export const getRect = (parentRef, positionX, positionY, { offsetX = 0, offsetY = 0 } = {}) => {
+export const getRect = (
+  parentRef,
+  positionX,
+  positionY,
+  { offsetX = 0, offsetY = 0 } = {}
+) => {
   const dom = parentRef.current;
 
   const { width, height } = dom.getBoundingClientRect();
   let resultX = positionX.toUpperCase() === "RIGHT" ? "100%" : 0 - offsetX;
-  let resultY = positionY.toUpperCase() === "BOTTOM" ? height - offsetY : 0 - offsetY;
+  let resultY =
+    positionY.toUpperCase() === "BOTTOM" ? height - offsetY : 0 - offsetY;
 
   return { top: resultY, left: resultX, width: width, height: height };
 };
@@ -82,7 +94,11 @@ export const getRect = (parentRef, positionX, positionY, { offsetX = 0, offsetY 
  * @param {*} param2
  * @returns
  */
-export const getCommRefRect = (compRef, parentRef, { positionX = "RIGHT", positionY = "BOTTOM", offsetX = 0, offsetY = 0 } = {}) => {
+export const getCommRefRect = (
+  compRef,
+  parentRef,
+  { positionX = "RIGHT", positionY = "BOTTOM", offsetX = 0, offsetY = 0 } = {}
+) => {
   const compRect = compRef.current.getBoundingClientRect();
   const parentRect = parentRef.current.getBoundingClientRect();
 
@@ -111,7 +127,10 @@ export const getCommRefRect = (compRef, parentRef, { positionX = "RIGHT", positi
  * @param {*} param1
  * @returns
  */
-export const getCompRect = (compRef, { positionX = "RIGHT", positionY = "BOTTOM", offsetX = 0, offsetY = 0 } = {}) => {
+export const getCompRect = (
+  compRef,
+  { positionX = "RIGHT", positionY = "BOTTOM", offsetX = 0, offsetY = 0 } = {}
+) => {
   const compRect = compRef.current.getBoundingClientRect();
 
   let top;
@@ -140,8 +159,15 @@ export const getCompRect = (compRef, { positionX = "RIGHT", positionY = "BOTTOM"
  * @param {*} param3 위치 보정용 객체(ex: { offsetX = 0, offsetY = 0 })
  * @returns {object} {top: 111, left: 111} 형태로 반환
  */
-export const getItemRect = (compRef, itemRef, { positionX = "RIGHT", positionY = "BOTTOM" } = {}, { offsetX = 0, offsetY = 0 } = {}) => {
-  const itemRect = itemRef.hasOwnProperty("current") ? itemRef.current.getBoundingClientRect() : itemRef.getBoundingClientRect();
+export const getItemRect = (
+  compRef,
+  itemRef,
+  { positionX = "RIGHT", positionY = "BOTTOM" } = {},
+  { offsetX = 0, offsetY = 0 } = {}
+) => {
+  const itemRect = itemRef.hasOwnProperty("current")
+    ? itemRef.current.getBoundingClientRect()
+    : itemRef.getBoundingClientRect();
   const compRect = compRef.current.getBoundingClientRect();
   const winRect = { width: window.innerWidth, height: window.innerHeight };
 
@@ -150,15 +176,27 @@ export const getItemRect = (compRef, itemRef, { positionX = "RIGHT", positionY =
 
   // right인 경우에는 해당 바운더리 밖으로 넘기지는 않을 것임
   if (positionX.toUpperCase() === "RIGHT") {
-    left = compRect.right < itemRect.right + offsetX ? compRect.right : itemRect.right + offsetX;
+    left =
+      compRect.right < itemRect.right + offsetX
+        ? compRect.right
+        : itemRect.right + offsetX;
   } else {
-    left = compRect.left > itemRect.left + offsetX ? compRect.left : itemRect.left + offsetX;
+    left =
+      compRect.left > itemRect.left + offsetX
+        ? compRect.left
+        : itemRect.left + offsetX;
   }
 
   if (positionY.toUpperCase() === "BOTTOM") {
-    top = compRect.bottom < itemRect.bottom + offsetY ? compRect.bottom : itemRect.bottom + offsetY;
+    top =
+      compRect.bottom < itemRect.bottom + offsetY
+        ? compRect.bottom
+        : itemRect.bottom + offsetY;
   } else {
-    top = compRect.top > itemRect.top + offsetY ? compRect.top : itemRect.top + offsetY;
+    top =
+      compRect.top > itemRect.top + offsetY
+        ? compRect.top
+        : itemRect.top + offsetY;
   }
 
   return { top, left };
@@ -223,7 +261,12 @@ export const combineEvents = (events1, events2) => {
  * @returns
  */
 export const copyObjectBykey = (fieldId, targetArr, copyArr) => {
-  if (fieldId && Array.isArray(targetArr) && Array.isArray(copyArr) && copyArr.length > 0) {
+  if (
+    fieldId &&
+    Array.isArray(targetArr) &&
+    Array.isArray(copyArr) &&
+    copyArr.length > 0
+  ) {
     const result = [];
     for (let i = 0; i < targetArr.length; i++) {
       let flag = false;
@@ -254,7 +297,11 @@ export const copyObjectBykey = (fieldId, targetArr, copyArr) => {
  * @param {*} setValueObj  키 : 값을 넣을 대상, value: 넣을 값
  * @param {*} objArr       객체를 가지고 있는 배열
  */
-export const findFieldAndSetObjectValue = (findValueObj, setValueObj, objArr) => {
+export const findFieldAndSetObjectValue = (
+  findValueObj,
+  setValueObj,
+  objArr
+) => {
   if (Array.isArray(objArr)) {
     const setKeys = Object.keys(setValueObj);
     const findKeys = Object.keys(findValueObj);
@@ -304,7 +351,10 @@ export const makeFlexAlign = (val, type = "flex") => {
 /**
  * 입력받은 값을 flex 정렬에 맞는 값으로 변환
  */
-export const makeDisplayFlexAlign = ({ verticalAlign, textAlign }, type = "flex") => {
+export const makeDisplayFlexAlign = (
+  { verticalAlign, textAlign },
+  type = "flex"
+) => {
   const result = {};
   if (type == "flex") {
     if (verticalAlign) {

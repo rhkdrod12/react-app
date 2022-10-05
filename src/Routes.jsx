@@ -35,11 +35,11 @@ const PathRoutes = () => {
   const App = basics?.["_app"] || Fragment;
   const NotFound = basics?.["404"] || Fragment;
   const Main = basics?.["main"] || NotFound;
-
+  console.log("라우터 생성");
   return (
     <App>
       <TransitionRouters>
-        {components.map(({ path, component: Component = Fragment }) => (
+        {components.map(({ path, component: Component = Fragment }, idx) => (
           <Route key={path} path={path} element={<Component />} />
         ))}
         <Route path="/" element={<Main />} />

@@ -1,9 +1,12 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { formFetch } from "../../hook/useFetch.jsx";
+import { defaultFormFetch, formFetch } from "../../hook/useFetch.jsx";
 import { Button, createTheme, TextField, ThemeProvider } from "@mui/material";
 import styled from "styled-components";
+import { LoadingButton } from "@mui/lab";
+import { enterEvent } from "../../utils/defaultKepEvent.jsx";
 import { Authorization } from "../../utils/authorization.jsx";
+import useReset from "../../hook/useReset.jsx";
 
 /**
  * 로그인 관련 컴포넌트
@@ -12,24 +15,38 @@ import { Authorization } from "../../utils/authorization.jsx";
  */
 const Login = () => {
   const [formValue, setFormValue] = useState({ username: "", passward: "" });
+  const [loading, setLoading] = useState(false);
+
   const navi = useNavigate();
   const movePath = useLocation()?.state?.prePath || "/";
+  const btnRef = useRef();
+  const formRef = useRef();
+
+  // useReset(() => {
+  //   console.log("useEffect3 동작");
+  //   setFormValue({ username: "", passward: "" });
+  //   setLoading(false);
+  // });
 
   console.log("state: %o", movePath);
 
   const onLogin = useCallback(
     (event) => {
+      event.preventDefault();
+      setLoading(true);
       setFormValue((value) => {
-        formFetch("/login", value)
+        defaultFormFetch("/login", value)
           .then((res) => {
             // 인증 셋!
             Authorization.setToken(res);
 
             // 메인으로 이동
             console.log("메인으로 이동 %o", movePath);
+            setLoading(false);
             navi(movePath);
           })
           .catch((reason) => {
+            setLoading(false);
             console.log("로그인 실패 ");
           });
 
@@ -38,14 +55,18 @@ const Login = () => {
     },
     [movePath]
   );
+
   const onChange = ({ target }) => {
     setFormValue((item) => ({ ...item, [target.name]: target.value }));
   };
-  const onJoin = () => {};
+  const onJoin = () => {
+    navi("/user/join");
+  };
+
   return (
     <LoginContainer>
       <LoginTitle>USER LOGIN</LoginTitle>
-      <form>
+      <form onSubmit={onLogin} ref={formRef}>
         <LoginInputArea>
           <ThemeProvider theme={theme}>
             <TextField
@@ -53,10 +74,12 @@ const Login = () => {
               label="ID"
               type="text"
               color="primary"
-              value={formValue.id}
+              value={formValue.username}
               name="username"
-              autoComplete="on"
+              autoComplete="username"
               onChange={onChange}
+              inputProps={{ pattern: "[a-zA-Z0-9]+" }}
+              disabled={loading}
             />
             <TextField
               id="pwd"
@@ -67,16 +90,35 @@ const Login = () => {
               name="passward"
               // autocomplte="on"
               onChange={onChange}
+              onKeyUp={enterEvent(() => {
+                btnRef.current.click();
+              })}
+              disabled={loading}
             />
-            <Button
+            <LoadingButton
+              id="loginBtn"
+              loading={loading}
               variant="contained"
               color="primary"
-              type="button"
-              onClick={onLogin}
+              type="submit"
+              ref={btnRef}
             >
               로그인
-            </Button>
-            <Button variant="contained" color="secondary" onClick={onJoin}>
+            </LoadingButton>
+            {/*<Button*/}
+            {/*  variant="contained"*/}
+            {/*  color="primary"*/}
+            {/*  type="button"*/}
+            {/*  onClick={onLogin}*/}
+            {/*>*/}
+            {/*  로그인*/}
+            {/*</Button>*/}
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={onJoin}
+              disabled={loading}
+            >
               회원가입
             </Button>
           </ThemeProvider>

@@ -104,6 +104,7 @@ const axiosRsInterceptor = (navigate) => {
           state: {
             movePath: location.pathname,
           },
+          replace: true,
         });
         return new Promise(() => {});
       }

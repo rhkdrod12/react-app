@@ -102,6 +102,24 @@ export function getFetch(url, param, callback) {
   });
 }
 
+export function defaultFormFetch(url, data) {
+  url = DEFAULT_URL + url;
+
+  return new Promise((resolve, reject) => {
+    axios
+      .post(url, makeFormData(data), {
+        headers: { "Content-type": "multipart/form-data" },
+      })
+      .then((res) => {
+        const result = JSOG.parse(res.request.response).result;
+        resolve(result);
+      })
+      .catch((error) => {
+        reject(axiosError(error));
+      });
+  });
+}
+
 /**
  * url로 param을 formData형태로 전송
  * @param url
@@ -110,6 +128,7 @@ export function getFetch(url, param, callback) {
  */
 export function formFetch(url, data) {
   url = DEFAULT_URL + url;
+
   return new Promise((resolve, reject) => {
     axiosInstance
       .post(url, makeFormData(data), {
