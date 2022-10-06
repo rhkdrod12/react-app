@@ -1,7 +1,22 @@
 import COM from "./System.js";
 import { COM_MESSAGE } from "./commonMessage.js";
-import { useNavigate } from "react-router-dom";
+import { Outlet, Route, useLocation, useNavigate } from "react-router-dom";
 import { axiosError, axiosInstance } from "../hook/useFetch.jsx";
+import React from "react";
+import Loading from "../module/BasicComp/Loading.jsx";
+
+export const isAuthorization = () => {
+  const token = sessionStorage.getItem(COM.ACCESS_TOKEN);
+  // 이걸 인증서버에서 값을 받는게 맞는 것인가..?
+};
+
+export const AuthRoutes = ({ authorization }) => {
+  const location = useLocation();
+
+  console.log(location);
+
+  return authorization ? <Loading /> : <Outlet />;
+};
 
 export class Authorization {
   /**

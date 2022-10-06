@@ -52,6 +52,23 @@
   color: rgb(158, 166, 173);
 }
 
+.main-frame-wapper {
+  display: grid;
+}
+
+.loading-wapper{
+  display: grid;
+  position: relative;
+  justify-items: center;
+  align-items: center;
+  text-align: center;
+  height: fit-content;
+  width: fit-content;
+  justify-self: center;
+  align-self: center;
+
+}
+
 /* #root {
   width: 100%;
   height: 100%;
