@@ -294,7 +294,6 @@ const useListDataReducer = (rowAllData) => {
     dataAction.setState(state);
   }, [state]);
 
-  console.log("render ListDataReducer");
   //return useGridAction(state, dispatch);
   //return useMemo(() => new ListDataAction(state, dispatch), [state]);
   return dataAction;

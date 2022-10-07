@@ -1,134 +1,81 @@
-import React, { memo, useState } from "react";
-import { fileDownload, useGetFetch } from "../../hook/useFetch.jsx";
+import React, { memo, useEffect, useMemo, useState } from "react";
+import { fileDownload, getFetch, useGetFetch } from "../../hook/useFetch.jsx";
 import { useGridComponent } from "../../module/ModuleComp/GridComp.jsx";
 import Button from "../../module/BasicComp/Button.jsx";
 import { StyleDiv } from "../../module/StyleComp/StyleComp";
-import { COMPARE_STRING } from "../../utils/DataListReducer.jsx";
+import { COMPARE_STRING } from "../../hook/useDataListReducer.jsx";
 import { formatSizeUnits } from "../../utils/commonUtils.js";
+import { FILE_TRANS } from "../../utils/SystemCode.js";
+import { useInit, useReset } from "../../hook/useReset.jsx";
 
 const FileDownLoad = () => {
-  const GridInfo = {
-    Row: {
-      height: 40,
-    },
-    Column: [
-      { id: "rowIndex", name: "번호", width: "5%", textAlign: "center" },
-      { id: "fileFullName", name: "파일이름", width: "50%" },
-      { id: "fileByte", name: "파일크기", width: "10%" },
-      {
-        id: "fileTransPer",
-        name: "진행",
-        width: "10%",
-        textAlign: "center",
-        defaultValue: "0",
-      },
-      { id: "fileOther", name: "비고", width: "20%", textAlign: "center" },
-      { id: "check", width: "5%", textAlign: "center", defaultValue: "0" },
-    ],
-    HeaderInfo: {
-      Row: {
-        css: {
-          backgroundColor: "#f0f0f0",
-          borderBottom: "1px solid black",
-          color: "#000",
-          letterSpacing: "2px",
-          fontSize: "14px",
-          fontWeight: "700",
-        },
-      },
-      Column: [
-        { id: "rowIndex" },
-        { id: "fileFullName", textAlign: "center" },
-        { id: "fileByte", textAlign: "center" },
-        { id: "fileTransPer", textAlign: "center" },
-        {
-          id: "check",
-          component: CheckAllBox,
-          css: {
-            "& .grid-header-column-name": { width: "100%", height: "100%" },
-          },
-        },
-      ],
-    },
-    DataInfo: {
-      css: {
-        backgroundColor: "#f0f0f0",
-        color: "#000",
-      },
-      Row: {
-        select: "#3060d9",
-        css: { "&:hover": { backgroundColor: "#6060d9" } },
-        event: { onClick: rowSelectEvent },
-      },
-      Column: [
-        { id: "rowIndex", formmater: (val) => val + 1 },
-        {
-          id: "fileFullName",
-          css: { cursor: "pointer" },
-          event: {
-            onClick: fileDownloadEvent,
-          },
-        },
-        { id: "fileByte", textAlign: "right", formmater: formatSizeUnits },
-        { id: "fileTransYn" },
-        { id: "fileTransPer", component: ProgressBarMgm },
-        {
-          id: "check",
-          component: CheckBox,
-          event: { onClick: fileCheckBoxClick },
-        },
-      ],
-      Scroll: { visibleCount: 10 },
-    },
-  };
+  const [files, setFiles] = useState([]);
 
-  const [files, setFiles] = useGetFetch("/api/getFileList", {
-    param: { page: 1, pageCount: 999 },
+  useInit(() => {
+    getFetch("/api/getFileList", { page: 1, pageCount: 999 }).then((result) =>
+      setFiles(result)
+    );
   });
 
-  // useEffect(() => {
-  //   files.forEach((item, idx) => (item.fileIndex = idx + 1));
-  // }, [files]);
+  useReset(() => {
+    setFiles([]);
+  });
 
-  const { rowAction, gridComponent } = useGridComponent(files, GridInfo);
+  const { rowAction, GridComponent } = useGridComponent(files, GridInfo);
 
   /**
    * 선택한 파일 다운로드 이벤트
    * @param {*} event
    */
-  const fileAllDownload = (event) => {
-    const resultData = rowAction
-      .getRowAllData()
-      .filter((val) => val.check == "1")
-      .reduce(
-        (acc, val) => {
-          acc.rowIdx.push(val.fileIndex - 1);
-          acc.fileId.push(val.fileId);
-          acc.fileByte += val.fileByte;
-          return acc;
-        },
-        { rowIdx: [], fileId: [], fileByte: 0 }
-      );
+  const fileAllDownload = useMemo(
+    () => (event) => {
+      const resultData = rowAction
+        .getRowAllData()
+        .filter((val) => val.check == "1")
+        .reduce(
+          (acc, val) => {
+            acc.rowIndex.push(val.rowIndex);
+            acc.fileId.push(val.fileId);
+            acc.fileByte += val.fileByte;
+            return acc;
+          },
+          { rowIndex: [], fileId: [], fileByte: 0 }
+        );
+      console.log("rowAllData: %o", rowAction.getRowAllData());
+      console.log("resutData: %o", resultData);
+      const progress = (process) => {
+        const percent = ((process.loaded * 100) / resultData.fileByte).toFixed(
+          2
+        );
 
-    const progress = (process) => {
-      const percent = ((process.loaded * 100) / resultData.fileByte).toFixed(2);
-      rowAction.setIndexColumnData(resultData.rowIdx, {
-        fileTransYn: 1,
-        fileTransPer: percent,
-      });
-    };
+        console.log("load: %s, percent: %s", process.loaded, percent);
 
-    fileDownload("/api/multiDownload", { fileId: resultData.fileId }, progress)
-      .then((result) => {
-        rowAction.setIndexColumnData(resultData.rowIdx, {
-          fileTransYn: 2,
-          fileTransPer: 100,
+        rowAction.setIndexColumnData(resultData.rowIndex, {
+          fileTransYn: FILE_TRANS.PROGRESS,
+          fileTransPer: percent,
         });
-      })
-      .catch((error) => {
-        rowAction.setIndexColumnData(resultData.rowIdx, { fileTransYn: 3 });
-      });
-  };
+      };
+
+      fileDownload(
+        "/api/multiDownload",
+        { fileId: resultData.fileId },
+        progress
+      )
+        .then((result) => {
+          console.log("완료");
+          rowAction.setIndexColumnData(resultData.rowIndex, {
+            fileTransYn: FILE_TRANS.FINISH,
+            fileTransPer: 100,
+          });
+        })
+        .catch((error) => {
+          rowAction.setIndexColumnData(resultData.rowIndex, {
+            fileTransYn: FILE_TRANS.FAIL,
+          });
+        });
+    },
+    [rowAction]
+  );
 
   const onKeyUp = (event) => {
     if (event.keyCode == "13") {
@@ -172,7 +119,7 @@ const FileDownLoad = () => {
             marginTop: 10,
           }}
         >
-          {gridComponent}
+          <GridComponent />
         </StyleDiv>
       </StyleDiv>
     </div>
@@ -190,26 +137,28 @@ const rowSelectEvent = (event, { id, rowIdx, rowAction }) => {
   // }
 };
 
+// 파일 다운로드 이벤트
 const fileDownloadEvent = (event, { id, rowIdx, rowAction }) => {
   const rowData = rowAction.getRowData(rowIdx);
   if (id != "check" && !rowData.fileTransYn) {
     const progress = (process) => {
       const percent = ((process.loaded * 100) / rowData.fileByte).toFixed(2);
       rowAction.setColumnData(rowIdx, {
-        fileTransYn: 1,
+        fileTransYn: FILE_TRANS.PROGRESS,
         fileTransPer: percent,
       });
     };
     fileDownload("/api/download", { fileId: rowData.fileId }, progress)
       .then((result) => {
-        rowAction.setColumnData(rowIdx, { fileTransYn: 2 });
+        rowAction.setColumnData(rowIdx, { fileTransYn: FILE_TRANS.FINISH });
       })
       .catch((error) => {
-        rowAction.setColumnData(rowIdx, { fileTransYn: 3 });
+        rowAction.setColumnData(rowIdx, { fileTransYn: FILE_TRANS.FAIL });
       });
   }
 };
 
+// 파일 체크 이벤트
 const fileCheckBoxClick = (event, { id, data, rowIdx, rowAction }) => {
   event.stopPropagation();
   rowAction.setColumnData(rowIdx, {
@@ -217,7 +166,7 @@ const fileCheckBoxClick = (event, { id, data, rowIdx, rowAction }) => {
   });
 };
 
-// 전체선택시
+// 전체 체크 컴포넌트
 const CheckAllBox = memo(({ id, data, rowAction }) => {
   // 리액트 기본적
   const [select, setSelect] = useState(false);
@@ -242,10 +191,9 @@ const CheckAllBox = memo(({ id, data, rowAction }) => {
   );
 });
 
+// 체크 컴포넌트
 const CheckBox = memo(
   ({ id, data, rowData, rowAction, rowIdx, colIdx, event }) => {
-    // 리액트 기본적
-    // console.log("render checkbox %s %s %s %o", data, id, rowIdx, rowData);
     const onChange = (e) => {
       rowAction.setColumnData(rowIdx, { check: e.target.checked ? "1" : "0" });
     };
@@ -262,28 +210,27 @@ const CheckBox = memo(
   }
 );
 
+// 진행바 selector
 const ProgressBarMgm = memo(
   ({ id, data, rowData, Column, rowIdx, colIdx, event }) => {
     let comp;
-    switch (rowData?.fileTransYn ?? 0) {
-      case 0:
-        comp = <StyleDiv>대기</StyleDiv>;
-        break;
-      case 1:
+    switch (rowData?.fileTransYn ?? FILE_TRANS.PREPARE) {
+      case FILE_TRANS.PROGRESS:
         comp = <ProgressBar percent={data} />;
         break;
-      case 2:
+      case FILE_TRANS.FINISH:
         comp = <ProgressBar percent={data} message="완료" />;
         break;
-      case 3:
+      case FILE_TRANS.FAIL:
         comp = <ProgressBar percent={data} message="실패" state="red" />;
         break;
-      case 4:
+      case FILE_TRANS.CANCEL:
         comp = <StyleDiv>취소</StyleDiv>;
         break;
-      case 5:
+      case FILE_TRANS.ERROR:
         comp = <StyleDiv>오류</StyleDiv>;
         break;
+      case FILE_TRANS.PREPARE:
       default:
         comp = <StyleDiv>대기</StyleDiv>;
         break;
@@ -292,7 +239,7 @@ const ProgressBarMgm = memo(
     return comp;
   }
 );
-
+// 진행바 컴포넌트
 const ProgressBar = memo(({ percent = 0, message, state = "transparent" }) => {
   return (
     <StyleDiv
@@ -333,5 +280,81 @@ const ProgressBar = memo(({ percent = 0, message, state = "transparent" }) => {
     </StyleDiv>
   );
 });
+
+// 그리드 설정 파일
+const GridInfo = {
+  Row: {
+    height: 40,
+  },
+  Column: [
+    { id: "rowIndex", name: "번호", width: "5%", textAlign: "center" },
+    { id: "fileFullName", name: "파일이름", width: "50%" },
+    { id: "fileByte", name: "파일크기", width: "10%" },
+    {
+      id: "fileTransPer",
+      name: "진행",
+      width: "10%",
+      textAlign: "center",
+      defaultValue: "0",
+    },
+    { id: "fileOther", name: "비고", width: "20%", textAlign: "center" },
+    { id: "check", width: "5%", textAlign: "center", defaultValue: "0" },
+  ],
+  HeaderInfo: {
+    Row: {
+      css: {
+        backgroundColor: "#f0f0f0",
+        borderBottom: "1px solid black",
+        color: "#000",
+        letterSpacing: "2px",
+        fontSize: "14px",
+        fontWeight: "700",
+      },
+    },
+    Column: [
+      { id: "rowIndex" },
+      { id: "fileFullName", textAlign: "center" },
+      { id: "fileByte", textAlign: "center" },
+      { id: "fileTransPer", textAlign: "center" },
+      {
+        id: "check",
+        component: CheckAllBox,
+        css: {
+          "& .grid-header-column-name": { width: "100%", height: "100%" },
+        },
+      },
+    ],
+  },
+  DataInfo: {
+    css: {
+      backgroundColor: "#f0f0f0",
+      color: "#000",
+    },
+    Row: {
+      select: "#3060d9",
+      css: { "&:hover": { backgroundColor: "#6060d9" } },
+      // event: { onClick: rowSelectEvent },
+    },
+    Column: [
+      { id: "rowIndex", formmater: (val) => val + 1 },
+      {
+        id: "fileFullName",
+        css: { cursor: "pointer" },
+        event: {
+          onClick: fileDownloadEvent,
+        },
+      },
+      { id: "fileByte", textAlign: "right", formmater: formatSizeUnits },
+      { id: "fileTransYn" },
+      { id: "fileTransPer", component: ProgressBarMgm },
+      {
+        id: "check",
+        component: CheckBox,
+        event: { onClick: fileCheckBoxClick },
+      },
+    ],
+    Scroll: { visibleCount: 10 },
+  },
+};
 
 export default FileDownLoad;

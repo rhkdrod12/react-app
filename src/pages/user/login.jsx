@@ -6,7 +6,7 @@ import styled from "styled-components";
 import { LoadingButton } from "@mui/lab";
 import { enterEvent } from "../../utils/defaultKepEvent.jsx";
 import { Authorization } from "../../utils/authorization.jsx";
-import useReset from "../../hook/useReset.jsx";
+import { useReset } from "../../hook/useReset.jsx";
 
 const initFormValue = { username: "", passward: "" };
 /**

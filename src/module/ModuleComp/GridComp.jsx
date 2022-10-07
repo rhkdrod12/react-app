@@ -1,4 +1,4 @@
-import React, { memo, useContext, useEffect, useState } from "react";
+import React, { Fragment, memo, useContext, useEffect, useState } from "react";
 import { ScrollYBox, useScrollYData } from "../../hook/useScroll.jsx";
 import {
   copyObjectBykey,
@@ -12,7 +12,7 @@ import {
 } from "/src/module/BasicComp/ContextProvider.jsx";
 import { StyleDiv } from "../StyleComp/StyleComp";
 import "/src/css/Module/GridComp.css";
-import useListDataReducer from "../../utils/DataListReducer.jsx";
+import useListDataReducer from "../../hook/useDataListReducer.jsx";
 
 export const useGridComponent = (rowAllData, gridInfo) => {
   // 데이터 제어 객체 생성
@@ -29,11 +29,19 @@ export const useGridComponent = (rowAllData, gridInfo) => {
   }, [rowAllData]);
 
   const rowState = rowAction.getRowState();
-  const gridComponent = (
-    <GridComp rowState={rowState} rowAction={rowAction} gridInfo={gridInfo} />
+  const GridComponent = (params) => (
+    <Fragment>
+      <GridComp
+        rowState={rowState}
+        rowAction={rowAction}
+        gridInfo={gridInfo}
+        {...params}
+      />
+    </Fragment>
   );
+
   // console.log(rowState);
-  return { rowState, rowAction, gridComponent };
+  return { rowState, rowAction, GridComponent };
 };
 
 const GridContextStore = createMutilContext([
@@ -85,17 +93,9 @@ const GridWrapper = memo(({ rowAllData, rowAction, GridInfo }) => {
               startIdx={scrollData.startIdx}
             ></GridBody>
           ) : (
-            <StyleDiv
-              className="grid-not-data"
-              inStyle={{
-                width: 150,
-                margin: "10px auto",
-                textAlign: "center",
-                ...css,
-              }}
-            >
+            <div className="grid-not-data" style={css}>
               데이터 없음
-            </StyleDiv>
+            </div>
           )}
         </div>
       </ScrollYBox>

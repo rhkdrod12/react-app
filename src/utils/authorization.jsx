@@ -1,21 +1,55 @@
 import COM from "./System.js";
 import { COM_MESSAGE } from "./commonMessage.js";
 import { Outlet, Route, useLocation, useNavigate } from "react-router-dom";
-import { axiosError, axiosInstance } from "../hook/useFetch.jsx";
-import React from "react";
+import {
+  axiosError,
+  axiosInstance,
+  DEFAULT_URL,
+  usePostFetch,
+} from "../hook/useFetch.jsx";
+import React, { useEffect, useState } from "react";
 import Loading from "../module/BasicComp/Loading.jsx";
+import axios from "axios";
+import System from "./System.js";
+import JSOG from "jsog";
 
 export const isAuthorization = () => {
   const token = sessionStorage.getItem(COM.ACCESS_TOKEN);
   // 이걸 인증서버에서 값을 받는게 맞는 것인가..?
 };
 
-export const AuthRoutes = ({ authorization }) => {
+export const AuthRoutes = () => {
   const location = useLocation();
-
+  const [authorization, setReulst] = useState(false);
   console.log(location);
+  useEffect(() => {
+    axios
+      .post(
+        `${DEFAULT_URL}/auth/access`,
+        { path: location.pathname },
+        {
+          headers: {
+            [COM.AUTHORIZATION]: Authorization.getAccessToken(),
+          },
+          withCredentials: true,
+          timeout: 3000,
+        }
+      )
+      .then((res) => {
+        console.log(res);
+        setReulst(true);
+      })
+      .catch((error) => {
+        console.log(axiosError(error));
+        setReulst(false);
+      });
+  }, [location.key]);
 
-  return authorization ? <Loading /> : <Outlet />;
+  return authorization ? (
+    <Outlet />
+  ) : (
+    <Loading message={"허가되지 않은 사용자입니다."} />
+  );
 };
 
 export class Authorization {
@@ -31,7 +65,7 @@ export class Authorization {
     // 갱신 토큰 셋
     localStorage.setItem(COM.REFRESH_TOKEN, refreshToken);
     // 헤더에 Authorization 항목으로 accessToken 지정
-    axiosInstance.defaults.headers.common["Authorization"] = accessToken;
+    axiosInstance.defaults.headers.common[COM.AUTHORIZATION] = accessToken;
   }
 
   /**
@@ -40,7 +74,7 @@ export class Authorization {
   static deleteToken() {
     sessionStorage.removeItem(COM.ACCESS_TOKEN);
     localStorage.removeItem(COM.REFRESH_TOKEN);
-    delete axiosInstance.defaults.headers.common["Authorization"];
+    delete axiosInstance.defaults.headers.common[COM.AUTHORIZATION];
   }
 
   /**
@@ -51,7 +85,7 @@ export class Authorization {
     // 인증 토큰 셋
     sessionStorage.setItem(COM.ACCESS_TOKEN, accessToken);
     // 헤더에 Authorization 항목으로 accessToken 지정
-    axiosInstance.defaults.headers.common["Authorization"] = accessToken;
+    axiosInstance.defaults.headers.common[COM.AUTHORIZATION] = accessToken;
   }
 
   /**
@@ -68,7 +102,7 @@ export class Authorization {
    */
   static deleteAccessToken() {
     sessionStorage.removeItem(COM.ACCESS_TOKEN);
-    delete axiosInstance.defaults.headers.common["Authorization"];
+    delete axiosInstance.defaults.headers.common[COM.AUTHORIZATION];
   }
 
   /**
@@ -76,6 +110,10 @@ export class Authorization {
    */
   static deleteRefreshToken() {
     localStorage.removeItem(COM.REFRESH_TOKEN);
+  }
+
+  static getAccessToken() {
+    return sessionStorage.getItem(COM.ACCESS_TOKEN);
   }
 }
 

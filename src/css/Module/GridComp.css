@@ -52,3 +52,9 @@
     border-radius: 10px;
     background: rgb(211, 209, 207);
 }
+
+.grid-not-data{
+    width: 150px;
+    margin: 10px auto;
+    text-align: center;
+}

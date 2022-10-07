@@ -18,7 +18,7 @@ export const axiosInstance = axios.create({
  * 입력한 URL에 param를 포함하여 GET요청을 보냄 (useState로 받음, 에러처리가 어려움)
  * @param {String} url 요청할 URL
  * @param {Object} param1 요청할 파라미터
- * @returns
+ * @returns {Array<Object>}
  */
 export const useGetFetch = (
   url,
@@ -275,9 +275,7 @@ export function fileDownload(url, param, onDownloadProgress) {
         resolve(true);
       })
       .catch((e) => {
-        const { message, code } = e;
-        console.log(e);
-        console.log(`Messgae: ${message}\nCode: ${code}`);
+        console.log(axiosError(e));
         reject(axiosError(e));
       });
   });
