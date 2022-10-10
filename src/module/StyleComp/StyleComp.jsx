@@ -1,6 +1,10 @@
 import styled from "styled-components";
 import { makeCssObject } from "../../utils/commonUtils";
 
+/**
+ * @param {Object} inStyle
+ * @type {*}
+ */
 export const StyleDiv = styled.div`
   ${({ inStyle }) => makeCssObject(inStyle)}
   ${({ InStyle }) => makeCssObject(InStyle)}

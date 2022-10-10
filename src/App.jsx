@@ -2,8 +2,9 @@ import Content from "./module/Content";
 import Footer from "./module/Footer";
 import Header from "./module/Header.jsx";
 import { BrowserRouter } from "react-router-dom";
-import { ModalProvider } from "./utils/ModalContext.jsx";
+import { ModalComponent, ModalProvider } from "./hook/useMessageModal.jsx";
 import { AxiosInterceptor } from "./utils/authorization";
+import React from "react";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
             <Header />
             <Content />
             <Footer />
+            <ModalComponent />
           </AxiosInterceptor>
         </ModalProvider>
       </BrowserRouter>

@@ -12,6 +12,7 @@ import Loading from "../module/BasicComp/Loading.jsx";
 import axios from "axios";
 import System from "./System.js";
 import JSOG from "jsog";
+import useMessageModal from "../hook/useMessageModal.jsx";
 
 export const isAuthorization = () => {
   const token = sessionStorage.getItem(COM.ACCESS_TOKEN);
@@ -20,8 +21,21 @@ export const isAuthorization = () => {
 
 export const AuthRoutes = () => {
   const location = useLocation();
-  const [authorization, setReulst] = useState(false);
+  const navigate = useNavigate();
+
+  const [authorization, setAuthorization] = useState({
+    result: false,
+    resultMessage: "",
+  });
   console.log(location);
+
+  const modalMessage = useMessageModal({
+    onSubmit: () => {
+      setAuthorization(false);
+      navigate("/user/login");
+    },
+  });
+
   useEffect(() => {
     axios
       .post(
@@ -36,16 +50,14 @@ export const AuthRoutes = () => {
         }
       )
       .then((res) => {
-        console.log(res);
-        setReulst(true);
+        setAuthorization(true);
       })
       .catch((error) => {
-        console.log(axiosError(error));
-        setReulst(false);
+        modalMessage(axiosError(error).resultMessage);
       });
   }, [location.key]);
 
-  return authorization ? (
+  return authorization.result ? (
     <Outlet />
   ) : (
     <Loading message={"허가되지 않은 사용자입니다."} />

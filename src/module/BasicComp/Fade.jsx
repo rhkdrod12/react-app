@@ -3,10 +3,20 @@ import { StyleDiv } from "../StyleComp/StyleComp";
 import "/src/css/global.css";
 /**
  * Fade 컴포넌트 자식 컴포넌트를 출력할 떄 fade in, out을 실시함
- * @param {Ojbect} param0 fadeIn: 실행할 애니메이션명, fadeOut : 실행할 애니메이션명
- * @returns
+ * @param {boolean} state on/off
+ * @param {Object} style style
+ * @param {String} fadeIn fadeIn을 실시할 애니메이션(global.css에 작성)
+ * @param {String }fadeOut fadeOut을 실시할 애니메이션(global.css에 작성)
+ * @return {JSX.Element|null}
+ * @constructor
  */
-export const Fade = ({ children, state, style = {}, fadeIn = "fadeIn", fadeOut = "fadeOut" }) => {
+export const Fade = ({
+  children,
+  state,
+  style = {},
+  fadeIn = "fadeIn",
+  fadeOut = "fadeOut",
+}) => {
   const [fade, setFade] = useState(true);
   const [show, setShow] = useState(false);
   const ref = useRef();
@@ -32,7 +42,16 @@ export const Fade = ({ children, state, style = {}, fadeIn = "fadeIn", fadeOut =
 
   // 스타일 기본 설정
   return show ? (
-    <StyleDiv ref={ref} inStyle={{ transformOrigin: "top", animation: `${fade ? "0.16s " + fadeIn : "0.1s " + fadeOut} forwards`, ...style }} onAnimationEnd={onAnimationEnd}>
+    <StyleDiv
+      ref={ref}
+      inStyle={{
+        transformOrigin: "top",
+        //animation: `${fade ? "0.16s " + fadeIn : "0.1s " + fadeOut} forwards`,
+        animation: `${fade ? "2s " + fadeIn : "1s " + fadeOut} forwards`,
+        ...style,
+      }}
+      onAnimationEnd={onAnimationEnd}
+    >
       {children}
     </StyleDiv>
   ) : null;

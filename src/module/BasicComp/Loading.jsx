@@ -14,7 +14,7 @@ const Loading = ({ scale = 1, message = "" }) => {
           L o a d i n g . . .
         </span>
       </div>
-      <div>{message}</div>
+      {/*<div>{message}</div>*/}
     </div>
   );
 };

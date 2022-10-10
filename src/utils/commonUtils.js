@@ -87,6 +87,26 @@ export const getRect = (
 
   return { top: resultY, left: resultX, width: width, height: height };
 };
+
+export const getCenter = (upperRef, curRef) => {
+  const upperRect = upperRef?.current.getBoundingClientRect();
+  const curRect = curRef?.current.getBoundingClientRect();
+
+  if (upperRect && curRect) {
+    const uY = upperRect.height - upperRect.top;
+    const uX = upperRect.width - upperRect.left;
+    const cY = curRect.height - curRect.top;
+    const cX = curRect.width - curRect.left;
+
+    const x = ((uX - cX) / (upperRect.width / 2)) * 100;
+    const y = ((uY - cY) / (upperRect.height / 2)) * 100;
+
+    return { x, y };
+  }
+
+  return null;
+};
+
 /**
  * @declare
  * @param {*} compRef

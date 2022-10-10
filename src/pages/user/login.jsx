@@ -7,6 +7,7 @@ import { LoadingButton } from "@mui/lab";
 import { enterEvent } from "../../utils/defaultKepEvent.jsx";
 import { Authorization } from "../../utils/authorization.jsx";
 import { useReset } from "../../hook/useReset.jsx";
+import useMessageModal from "../../hook/useMessageModal.jsx";
 
 const initFormValue = { username: "", passward: "" };
 /**
@@ -20,6 +21,7 @@ const Login = () => {
 
   const navi = useNavigate();
   const movePath = useLocation()?.state?.prePath || "/";
+  const modalMessage = useMessageModal();
   const btnRef = useRef();
   const formRef = useRef();
 
@@ -49,6 +51,7 @@ const Login = () => {
           .catch((reason) => {
             setLoading(false);
             console.log("로그인 실패 ");
+            modalMessage(reason.resultMessage);
           });
 
         return value;
@@ -106,14 +109,6 @@ const Login = () => {
             >
               로그인
             </LoadingButton>
-            {/*<Button*/}
-            {/*  variant="contained"*/}
-            {/*  color="primary"*/}
-            {/*  type="button"*/}
-            {/*  onClick={onLogin}*/}
-            {/*>*/}
-            {/*  로그인*/}
-            {/*</Button>*/}
             <Button
               variant="contained"
               color="secondary"
