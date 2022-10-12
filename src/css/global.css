@@ -89,7 +89,19 @@
   width: fit-content;
   justify-self: center;
   align-self: center;
+}
 
+
+.center-wapper{
+  display: grid;
+  position: relative;
+  justify-items: center;
+  align-items: center;
+  text-align: center;
+  height: fit-content;
+  width: fit-content;
+  justify-self: center;
+  align-self: center;
 }
 
 /* #root {
