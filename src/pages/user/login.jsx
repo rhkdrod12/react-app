@@ -31,8 +31,7 @@ const Login = () => {
     setLoading(false);
   });
 
-  console.log("state: %o", movePath);
-
+  // 로그인 이벤트
   const onLogin = useCallback(
     (event) => {
       event.preventDefault();
@@ -60,12 +59,13 @@ const Login = () => {
     [movePath]
   );
 
-  const onChange = ({ target }) => {
+  const onChange = useCallback(({ target }) => {
     setFormValue((item) => ({ ...item, [target.name]: target.value }));
-  };
-  const onJoin = () => {
+  }, []);
+
+  const onJoin = useCallback(({ target }) => {
     navi("/user/join");
-  };
+  }, []);
 
   return (
     <LoginContainer>

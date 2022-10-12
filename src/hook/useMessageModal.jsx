@@ -43,7 +43,7 @@ export const ModalProvider = ({ children }) => {
  * @param type    : ALERT, CONFIRM, ERROR
  * @param message : 표기할 메시지
  * @param {{type: String, onSubmit: function, onClose: function}} config  : 추가로 설정한 Config : { onSubmit, onClose }
- * @return {function(String, Object)}
+ * @return {function(String, {type: String, onSubmit: function, onClose: function})}
  */
 const useMessageModal = (defaultConfig) => {
   const setParam = useContext(ModalsDispatchContext);

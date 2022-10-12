@@ -24,6 +24,7 @@ export const AuthRoutes = () => {
   const navigate = useNavigate();
 
   const [authorization, setAuthorization] = useState(false);
+  const [error, setError] = useState(false);
   console.log(location);
 
   const modalMessage = useMessageModal();
@@ -47,32 +48,38 @@ export const AuthRoutes = () => {
       })
       .catch((error) => {
         const errorResult = axiosError(error);
-
+        setAuthorization(false);
         if (
           COM_MESSAGE.UNAUTHORIZED.resultCode == errorResult.resultCode ||
           COM_MESSAGE.EXPIRE_AUTHORIZED.resultCode == errorResult.resultCode
         ) {
-          setAuthorization(false);
+          // 권한없는 경우 로그인 알림창 후 로그인 화면으로 이동
           modalMessage(axiosError(error).resultMessage, {
             onSubmit: () => {
               navigate("/user/login", {
                 state: { prePath: location.pathname },
               });
             },
+            onClose: () => {
+              // navigate("/user/login", {
+              //   state: { prePath: location.pathname },
+              // });
+            },
           });
+        } else {
+          // 에러 메시지 출력
+          setError(true);
+          modalMessage(axiosError(error).resultMessage);
         }
       });
 
     return () => {
       setAuthorization(false);
+      setError(false);
     };
   }, [location.key]);
 
-  return authorization ? (
-    <Outlet />
-  ) : (
-    <Loading message={"허가되지 않은 사용자입니다."} />
-  );
+  return authorization ? <Outlet /> : <Loading error={error} />;
 };
 
 export class Authorization {
