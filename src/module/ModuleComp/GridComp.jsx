@@ -1,4 +1,12 @@
-import React, { Fragment, memo, useContext, useEffect, useState } from "react";
+import React, {
+  Fragment,
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { ScrollYBox, useScrollYData } from "../../hook/useScroll.jsx";
 import {
   copyObjectBykey,
@@ -16,7 +24,7 @@ import useListDataReducer from "../../hook/useDataListReducer.jsx";
 
 export const useGridComponent = (rowAllData, gridInfo) => {
   // 데이터 제어 객체 생성
-  const rowAction = useListDataReducer();
+  const [rowState, rowAction] = useListDataReducer(rowAllData);
 
   // 공통설정을 각각의 header, data, footer에 적용
   useEffect(() => {
@@ -28,19 +36,10 @@ export const useGridComponent = (rowAllData, gridInfo) => {
     rowAction.setInit(rowAllData);
   }, [rowAllData]);
 
-  const rowState = rowAction.getRowState();
-  const GridComponent = (params) => (
-    <Fragment>
-      <GridComp
-        rowState={rowState}
-        rowAction={rowAction}
-        gridInfo={gridInfo}
-        {...params}
-      />
-    </Fragment>
+  const GridComponent = (
+    <GridComp rowState={rowState} rowAction={rowAction} gridInfo={gridInfo} />
   );
 
-  // console.log(rowState);
   return { rowState, rowAction, GridComponent };
 };
 
@@ -53,7 +52,7 @@ const GridComp = ({ rowState, rowAction, gridInfo }) => {
   const [GridInfo, setGridInfo] = useState(gridInfo);
   // 컨텍스트 데이터 저장
   const contextData = { rowState, rowAction, GridInfo };
-  // console.log("render GridComp %o", rowState);
+
   const rowAllData = rowAction.getRowAllData();
 
   return (
@@ -75,9 +74,8 @@ const GridWrapper = memo(({ rowAllData, rowAction, GridInfo }) => {
   const [scrollData, ref] = useScrollYData(rowAllData, DataInfo.Scroll);
   // 스크롤 데이터
   const { scrollRowData, dataTranslateY, scrollDisplay } = scrollData;
-  // console.log("render GridWrapper");
+  // CSS
   const { css } = DataInfo;
-
   return (
     <React.Fragment>
       <GridHeader HeaderInfo={HeaderInfo} scroll={scrollDisplay}></GridHeader>
@@ -178,7 +176,6 @@ const GridHeaderColumn = memo(({ column }) => {
  * 그리드 Body부분(데이터 표현 부분)
  */
 const GridBody = memo(({ rowAllData, rowAction, startIdx }) => {
-  // console.log("render dataBody");
   const { css, event } = useContext(GridContextStore.GridInfo).DataInfo;
   const [selectIdx, setSelectIdx] = useState(-1);
   const bodyEvent = makeEvent(event, { rowAction });
@@ -211,8 +208,6 @@ const GridBodyRow = memo(({ rowData, rowIdx, selectIdx, setSelectIdx }) => {
   const rowAllData = rowAction.getRowAllData();
   const Row = DataInfo.Row;
   const RowColumn = DataInfo.Column;
-
-  // console.log("render row %s", rowIdx);
 
   const styleParam = {
     display: "flex",

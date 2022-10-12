@@ -12,6 +12,7 @@ const FileDownLoad = () => {
   const [files, setFiles] = useState([]);
 
   useInit(() => {
+    console.log("여기 render");
     getFetch("/api/getFileList", { page: 1, pageCount: 999 }).then((result) =>
       setFiles(result)
     );
@@ -41,15 +42,11 @@ const FileDownLoad = () => {
           },
           { rowIndex: [], fileId: [], fileByte: 0 }
         );
-      console.log("rowAllData: %o", rowAction.getRowAllData());
-      console.log("resutData: %o", resultData);
+
       const progress = (process) => {
         const percent = ((process.loaded * 100) / resultData.fileByte).toFixed(
           2
         );
-
-        console.log("load: %s, percent: %s", process.loaded, percent);
-
         rowAction.setIndexColumnData(resultData.rowIndex, {
           fileTransYn: FILE_TRANS.PROGRESS,
           fileTransPer: percent,
@@ -62,7 +59,7 @@ const FileDownLoad = () => {
         progress
       )
         .then((result) => {
-          console.log("완료");
+          console.log("완료 %o %o", resultData.rowIndex, rowAction);
           rowAction.setIndexColumnData(resultData.rowIndex, {
             fileTransYn: FILE_TRANS.FINISH,
             fileTransPer: 100,
@@ -119,7 +116,8 @@ const FileDownLoad = () => {
             marginTop: 10,
           }}
         >
-          <GridComponent />
+          {/*<GridComponent />*/}
+          {GridComponent}
         </StyleDiv>
       </StyleDiv>
     </div>
@@ -150,7 +148,10 @@ const fileDownloadEvent = (event, { id, rowIdx, rowAction }) => {
     };
     fileDownload("/api/download", { fileId: rowData.fileId }, progress)
       .then((result) => {
-        rowAction.setColumnData(rowIdx, { fileTransYn: FILE_TRANS.FINISH });
+        rowAction.setColumnData(rowIdx, {
+          fileTransYn: FILE_TRANS.FINISH,
+          fileTransPer: 100,
+        });
       })
       .catch((error) => {
         rowAction.setColumnData(rowIdx, { fileTransYn: FILE_TRANS.FAIL });

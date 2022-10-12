@@ -39,15 +39,16 @@ export const ModalProvider = ({ children }) => {
 };
 
 /**
- * MessageModal창을 활성화 시키는 함수
+ * MessageModal창을 활성화 시키는 함수를 반환하는 훅
  * @param type    : ALERT, CONFIRM, ERROR
  * @param message : 표기할 메시지
  * @param {{type: String, onSubmit: function, onClose: function}} config  : 추가로 설정한 Config : { onSubmit, onClose }
- * @return {function}
+ * @return {function(String, Object)}
  */
-const useMessageModal = (config) => {
+const useMessageModal = (defaultConfig) => {
   const setParam = useContext(ModalsDispatchContext);
-  return (message) => setParam({ isOpen: true, message, config });
+  return (message, config) =>
+    setParam({ isOpen: true, message, config: config || defaultConfig });
 };
 
 export const ModalComponent = () => {
@@ -80,42 +81,27 @@ export const ModalComponent = () => {
               className={"modal-message-container"}
               upperRef={upperRef}
             >
-              <Fade
-                state={isOpen}
-                fadeIn={"fadeZoomIn"}
-                fadeOut={"fadeZoomOut"}
-              >
-                <ModalWarp>
-                  <ModalTitle>
-                    {type}
-                    <CloseIcon onClick={onDefaultClose}></CloseIcon>
-                  </ModalTitle>
-                  <ModalContent>{message}</ModalContent>
-                  <ModalBottom>
-                    {type == MODAL_TYPE.CONFIRM ? (
-                      <Fragment>
-                        <LoadingButton
-                          id="loginBtn"
-                          variant="contained"
-                          color="primary"
-                          type="submit"
-                          size="small"
-                          sx={{ height: 35 }}
-                          onClick={onDefaultSubmit}
-                        >
-                          확인
-                        </LoadingButton>
-                        <Button
-                          variant="contained"
-                          color="cancel"
-                          size="small"
-                          sx={{ height: 35 }}
-                          onClose={onDefaultClose}
-                        >
-                          취소
-                        </Button>
-                      </Fragment>
-                    ) : (
+              {/*<Fade*/}
+              {/*  state={isOpen}*/}
+              {/*  fadeIn={"fadeZoomIn"}*/}
+              {/*  fadeOut={"fadeZoomOut"}*/}
+              {/*>*/}
+              <ModalWarp>
+                <ModalTitle>
+                  {type}
+                  <CloseIcon
+                    onClick={onDefaultClose}
+                    sx={{
+                      "&:hover": {
+                        color: "rgba(0,0,0,0.6)",
+                      },
+                    }}
+                  ></CloseIcon>
+                </ModalTitle>
+                <ModalContent>{message}</ModalContent>
+                <ModalBottom>
+                  {type == MODAL_TYPE.CONFIRM ? (
+                    <Fragment>
                       <LoadingButton
                         id="loginBtn"
                         variant="contained"
@@ -124,14 +110,36 @@ export const ModalComponent = () => {
                         size="small"
                         sx={{ height: 35 }}
                         onClick={onDefaultSubmit}
-                        onClose={onDefaultClose}
                       >
                         확인
                       </LoadingButton>
-                    )}
-                  </ModalBottom>
-                </ModalWarp>
-              </Fade>
+                      <Button
+                        variant="contained"
+                        color="cancel"
+                        size="small"
+                        sx={{ height: 35 }}
+                        onClose={onDefaultClose}
+                      >
+                        취소
+                      </Button>
+                    </Fragment>
+                  ) : (
+                    <LoadingButton
+                      id="loginBtn"
+                      variant="contained"
+                      color="primary"
+                      type="submit"
+                      size="small"
+                      sx={{ height: 35 }}
+                      onClick={onDefaultSubmit}
+                      onClose={onDefaultClose}
+                    >
+                      확인
+                    </LoadingButton>
+                  )}
+                </ModalBottom>
+              </ModalWarp>
+              {/*</Fade>*/}
             </ModalContainer>
           </ThemeProvider>
         </ModalOverlay>
@@ -143,51 +151,43 @@ export const ModalComponent = () => {
 const MoveContainer = ({ children, className, upperRef }) => {
   const [move, setMove] = useState(false);
   const [offset, setOffset] = useState({ moveX: 0, moveY: 0 });
-  const [rect, setRect] = useState({
-    locTop: 0,
-    locLeft: 0,
-    curTop: 0,
-    curLeft: 0,
-  });
-
+  const [rect, setRect] = useState({ left: 0, top: 0 });
   const curRef = useRef();
 
+  // 초기값 지정
   useEffect(() => {
     const upperRect = upperRef?.current.getBoundingClientRect();
-    const curRect = curRef?.current.getBoundingClientRect();
-
-    debugger;
-
-    setOffset((val) => ({
-      moveX: upperRect.width / 2 - curRect.width / 2,
-      moveY: upperRect.height / 2 - curRect.height / 2,
+    setRect((val) => ({
+      left: upperRect.width / 2,
+      top: upperRect.height / 2,
     }));
-
     return () => {
       setMove(false);
       setOffset({ moveX: 0, moveY: 0 });
+      setRect({ left: 0, top: 0 });
     };
   }, []);
 
+  // 마우스 누르기 이벤트
   const onMouseDown = (event) => {
     setMove(true);
   };
 
+  // 마우스 이동 이벤트
   const onMouseMove = (event) => {
     if (move) {
-      const moveX = event.movementX;
-      const moveY = event.movementY;
-      setTimeout(() => {
-        setOffset((val) => ({
+      setOffset((val) => {
+        const result = {
           moveX: val.moveX + event.movementX,
           moveY: val.moveY + event.movementY,
-        }));
-      }, 0);
+        };
+        return result;
+      });
     }
   };
 
+  // 마우스 떼기 이벤트
   const onMouseUp = (event) => {
-    console.log("작동 %o", event);
     setMove(false);
   };
 
@@ -199,10 +199,11 @@ const MoveContainer = ({ children, className, upperRef }) => {
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
       onMouseLeave={onMouseUp}
-      // onMouseOut={onMouseUp}
       style={{
-        left: offset.moveX,
-        top: offset.moveY,
+        left: `${
+          ((rect.left / 2 + offset.moveX / 2) / rect.left) * 100 || 50
+        }%`,
+        top: `${((rect.top / 2 + offset.moveY / 2) / rect.top) * 100 || 50}%`,
       }}
     >
       {upperRef && children}
@@ -235,7 +236,7 @@ const ModalContainer = styled(MoveContainer)`
   position: absolute;
   //top: 50%;
   //left: 50%;
-  //transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
   min-width: 400px;
   max-width: 600px;
   //min-height: 300px;

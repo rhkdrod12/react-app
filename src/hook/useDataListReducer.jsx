@@ -46,12 +46,12 @@ class FilterData {
  * @constructor
  */
 export class ListDataAction {
+  rowState = new ListDataState();
+
   constructor(state, dispatch) {
     /** @type {ListDataState}*/
     this.rowState = state;
-    /**
-     * @type {function(Object):void}
-     */
+    /** @type {function(Object):void} */
     this.dispatch = dispatch;
   }
 
@@ -188,7 +188,7 @@ export class ListDataAction {
    * @param {Array<Number>} [rowIndex]
    * @param {Object} columnData
    */
-  setIndexColumnData = (rowIndex = new Array(), columnData) => {
+  setIndexColumnData = (rowIndex = [], columnData) => {
     const result = this.rowState.rowAllData.map((val, idx) =>
       rowIndex.includes(idx) ? { ...val, ...columnData } : val
     );
@@ -200,7 +200,7 @@ export class ListDataAction {
    * @param {String} id
    * @returns {Array} rowDatas
    */
-  getIndexColumnData = (rowIndex = new Array(), id) => {
+  getIndexColumnData = (rowIndex = [], id) => {
     return this.rowState.rowAllData
       .filter((val, idx) => rowIndex.includes(idx))
       .map((val, idx) => val[id]);
@@ -288,15 +288,11 @@ const useListDataReducer = (rowAllData) => {
     dispatch({ type: "setInit", rowAllData: rowAllData ?? new Array() });
   }, [rowAllData]);
 
-  // 데이터 변경은 dispatch에 의해 작동되기 때문에 데이터가 변경되면
-  // state가 변경됨 => 따라서 state가 변경된 상태에는 dataAction의 state를 교환처리하여 데이터를 일괄 적으로 가져올 수 이 있게함
-  useEffect(() => {
-    dataAction.setState(state);
-  }, [state]);
+  // state 갱신
+  dataAction.setState(state);
 
-  //return useGridAction(state, dispatch);
-  //return useMemo(() => new ListDataAction(state, dispatch), [state]);
-  return dataAction;
+  // 반환!
+  return [state, dataAction];
 };
 
 /**
@@ -613,6 +609,7 @@ const ListDataReducer = (state, action) => {
     default:
       throw new Error("Unsupported action type:", type);
   }
+
   return new ListDataState(resultState);
 };
 

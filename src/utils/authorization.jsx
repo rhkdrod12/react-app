@@ -23,18 +23,10 @@ export const AuthRoutes = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [authorization, setAuthorization] = useState({
-    result: false,
-    resultMessage: "",
-  });
+  const [authorization, setAuthorization] = useState(false);
   console.log(location);
 
-  const modalMessage = useMessageModal({
-    onSubmit: () => {
-      setAuthorization(false);
-      navigate("/user/login");
-    },
-  });
+  const modalMessage = useMessageModal();
 
   useEffect(() => {
     axios
@@ -50,14 +42,33 @@ export const AuthRoutes = () => {
         }
       )
       .then((res) => {
-        setAuthorization(true);
+        console.log(res);
+        setAuthorization(res.data.result);
       })
       .catch((error) => {
-        modalMessage(axiosError(error).resultMessage);
+        const errorResult = axiosError(error);
+
+        if (
+          COM_MESSAGE.UNAUTHORIZED.resultCode == errorResult.resultCode ||
+          COM_MESSAGE.EXPIRE_AUTHORIZED.resultCode == errorResult.resultCode
+        ) {
+          setAuthorization(false);
+          modalMessage(axiosError(error).resultMessage, {
+            onSubmit: () => {
+              navigate("/user/login", {
+                state: { prePath: location.pathname },
+              });
+            },
+          });
+        }
       });
+
+    return () => {
+      setAuthorization(false);
+    };
   }, [location.key]);
 
-  return authorization.result ? (
+  return authorization ? (
     <Outlet />
   ) : (
     <Loading message={"허가되지 않은 사용자입니다."} />
