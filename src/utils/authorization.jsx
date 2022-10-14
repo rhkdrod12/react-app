@@ -7,7 +7,7 @@ import {
   DEFAULT_URL,
   usePostFetch,
 } from "../hook/useFetch.jsx";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Loading from "../module/BasicComp/Loading.jsx";
 import axios from "axios";
 import System from "./System.js";
@@ -28,6 +28,12 @@ export const AuthRoutes = () => {
   console.log(location);
 
   const modalMessage = useMessageModal();
+
+  const onMove = useCallback(() => {
+    navigate("/user/login", {
+      state: { prePath: location.pathname },
+    });
+  }, [location]);
 
   useEffect(() => {
     axios
@@ -55,16 +61,8 @@ export const AuthRoutes = () => {
         ) {
           // 권한없는 경우 로그인 알림창 후 로그인 화면으로 이동
           modalMessage(axiosError(error).resultMessage, {
-            onSubmit: () => {
-              navigate("/user/login", {
-                state: { prePath: location.pathname },
-              });
-            },
-            onClose: () => {
-              // navigate("/user/login", {
-              //   state: { prePath: location.pathname },
-              // });
-            },
+            onSubmit: onMove,
+            onClose: onMove,
           });
         } else {
           // 에러 메시지 출력
