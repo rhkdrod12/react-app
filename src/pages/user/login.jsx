@@ -37,7 +37,7 @@ const Login = () => {
       event.preventDefault();
       setLoading(true);
       setFormValue((value) => {
-        defaultFormFetch("/login", value)
+        defaultFormFetch("/user/login", value)
           .then((res) => {
             // 인증 셋!
             Authorization.setToken(res);
