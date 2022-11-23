@@ -1,6 +1,7 @@
 import React, {
   createContext,
   Fragment,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -24,8 +25,8 @@ export const MODAL_TYPE = {
   ERROR: "에 러", // 에러
 };
 
-export const ModalsStateContext = createContext();
-export const ModalsDispatchContext = createContext();
+export const ModalsStateContext = createContext(null);
+export const ModalsDispatchContext = createContext(null);
 
 export const ModalProvider = ({ children }) => {
   const [param, setParam] = useState({});
@@ -47,8 +48,11 @@ export const ModalProvider = ({ children }) => {
  */
 const useMessageModal = (defaultConfig = null) => {
   const setParam = useContext(ModalsDispatchContext);
-  return (message, config) =>
-    setParam({ isOpen: true, message, config: config || defaultConfig });
+  return useCallback(
+    (message, config) =>
+      setParam({ isOpen: true, message, config: config || defaultConfig }),
+    [defaultConfig]
+  );
 };
 
 export const ModalComponent = () => {
@@ -81,11 +85,6 @@ export const ModalComponent = () => {
               className={"modal-message-container"}
               upperRef={upperRef}
             >
-              {/*<Fade*/}
-              {/*  state={isOpen}*/}
-              {/*  fadeIn={"fadeZoomIn"}*/}
-              {/*  fadeOut={"fadeZoomOut"}*/}
-              {/*>*/}
               <ModalWarp>
                 <ModalTitle>
                   {type}
@@ -139,7 +138,6 @@ export const ModalComponent = () => {
                   )}
                 </ModalBottom>
               </ModalWarp>
-              {/*</Fade>*/}
             </ModalContainer>
           </ThemeProvider>
         </ModalOverlay>

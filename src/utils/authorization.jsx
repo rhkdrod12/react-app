@@ -1,85 +1,100 @@
 import COM from "./System.js";
 import { COM_MESSAGE } from "./commonMessage.js";
-import { Outlet, Route, useLocation, useNavigate } from "react-router-dom";
+import {
+  Navigate,
+  Outlet,
+  Route,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import {
   axiosError,
   axiosInstance,
   DEFAULT_URL,
   usePostFetch,
 } from "../hook/useFetch.jsx";
-import React, { useCallback, useEffect, useState } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import Loading from "../module/BasicComp/Loading.jsx";
 import axios from "axios";
 import System from "./System.js";
 import JSOG from "jsog";
 import useMessageModal from "../hook/useMessageModal.jsx";
+import { useStableNavigate } from "../module/BasicComp/StableNavigateContext.jsx";
 
 export const isAuthorization = () => {
   const token = sessionStorage.getItem(COM.ACCESS_TOKEN);
   // 이걸 인증서버에서 값을 받는게 맞는 것인가..?
 };
 
-export const AuthRoutes = () => {
+export const AuthRoutes = ({ children: Children, key, path }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // const [authorization, setAuthorization] = useState(false);
-  const [authorization, setAuthorization] = useState(true);
+  //
+  const modalMessage = useMessageModal();
+  // const navigate = useStableNavigate();
+  const [authorization, setAuthorization] = useState(false);
+  // const [authorization, setAuthorization] = useState(true);
   const [error, setError] = useState(false);
 
-  console.log(location);
-
-  const modalMessage = useMessageModal();
-
+  console.log("인증 라우터 %o", path);
   const onMove = useCallback(() => {
     navigate("/user/login", {
       state: { prePath: location.pathname },
     });
   }, [location]);
 
-  // useEffect(() => {
-  //   axios
-  //     .post(
-  //       `${DEFAULT_URL}/auth/access`,
-  //       { path: location.pathname },
-  //       {
-  //         headers: {
-  //           [COM.AUTHORIZATION]: Authorization.getAccessToken(),
-  //         },
-  //         withCredentials: true,
-  //         timeout: 3000,
-  //       }
-  //     )
-  //     .then((res) => {
-  //       console.log(res);
-  //       setAuthorization(res.data.result);
-  //     })
-  //     .catch((error) => {
-  //       const errorResult = axiosError(error);
-  //       setAuthorization(false);
-  //       if (
-  //         COM_MESSAGE.UNAUTHORIZED.resultCode == errorResult.resultCode ||
-  //         COM_MESSAGE.EXPIRE_AUTHORIZED.resultCode == errorResult.resultCode
-  //       ) {
-  //         // 권한없는 경우 로그인 알림창 후 로그인 화면으로 이동
-  //         modalMessage(axiosError(error).resultMessage, {
-  //           onSubmit: onMove,
-  //           onClose: onMove,
-  //         });
-  //       } else {
-  //         // 에러 메시지 출력
-  //         setError(true);
-  //         modalMessage(axiosError(error).resultMessage);
-  //       }
-  //     });
-  //
-  //   return () => {
-  //     setAuthorization(false);
-  //     setError(false);
-  //   };
-  // }, [location.key]);
+  useEffect(() => {
+    axios
+      .post(
+        `${DEFAULT_URL}/auth/access`,
+        { path: location.pathname },
+        {
+          headers: {
+            [COM.AUTHORIZATION]: Authorization.getAccessToken(),
+          },
+          withCredentials: true,
+          timeout: 3000,
+        }
+      )
+      .then((res) => {
+        console.log(res);
+        setAuthorization(res.data.result);
+      })
+      .catch((error) => {
+        const errorResult = axiosError(error);
+        setAuthorization(false);
+        if (
+          COM_MESSAGE.UNAUTHORIZED.resultCode == errorResult.resultCode ||
+          COM_MESSAGE.EXPIRE_AUTHORIZED.resultCode == errorResult.resultCode
+        ) {
+          // 권한없는 경우 로그인 알림창 후 로그인 화면으로 이동
+          modalMessage(axiosError(error).resultMessage, {
+            onSubmit: onMove,
+            onClose: onMove,
+          });
+        } else {
+          // 에러 메시지 출력
+          setError(true);
+          modalMessage(axiosError(error).resultMessage);
+        }
+      });
 
-  return authorization ? <Outlet /> : <Loading error={error} />;
+    return () => {
+      setAuthorization(false);
+      setError(false);
+    };
+  }, [location.key]);
+
+  return (
+    <Fragment>{authorization ? Children : <Loading error={error} />}</Fragment>
+  );
 };
 
 export class Authorization {

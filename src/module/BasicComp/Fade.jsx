@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { StyleDiv } from "../StyleComp/StyleComp";
 import "/src/css/global.css";
+import { AnimatePresence, motion } from "framer-motion";
 /**
  * Fade 컴포넌트 자식 컴포넌트를 출력할 떄 fade in, out을 실시함
  * @param {boolean} state on/off
@@ -58,4 +59,32 @@ export const Fade = ({
       {children}
     </StyleDiv>
   ) : null;
+};
+
+export const FadeDiv = ({ children, className, ...param }) => {
+  return (
+    <motion.div
+      className={className}
+      initial={animate.initial}
+      animate={animate.animate}
+      exit={animate.exit}
+      {...param}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+const animate = {
+  initial: {
+    opacity: 0,
+  },
+  animate: {
+    opacity: 1,
+    transition: { property: "opacity", duration: 0.12 },
+  },
+  exit: {
+    opacity: 0,
+    transition: { property: "opacity", duration: 0.15 },
+  },
 };

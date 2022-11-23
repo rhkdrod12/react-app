@@ -1,5 +1,5 @@
 import { Button, MenuList } from "@mui/material";
-import React from "react";
+import React, { Fragment } from "react";
 import styled from "styled-components";
 import { StyleDiv, StyleHeader } from "./StyleComp/StyleComp.jsx";
 import HeaderMenu from "./ModuleComp/HeaderMenu.jsx";
@@ -32,6 +32,31 @@ const Header = ({ height = 50 }) => {
       <HeaderMenu />
       {/* <Menu height={height}></Menu> */}
       {/* 오른쪽 항목 */}
+      <Button
+        variant="contained"
+        color="secondary"
+        sx={{ width: 150 }}
+        onClick={() => navi("/fileMgm/fileUpload")}
+      >
+        업로드
+      </Button>
+      <Button
+        variant="contained"
+        color="secondary"
+        sx={{ width: 150 }}
+        onClick={() => navi("/fileMgm/fileDownLoad")}
+      >
+        다운로드
+      </Button>
+      <Button
+        variant="contained"
+        color="secondary"
+        sx={{ width: 150 }}
+        onClick={() => navi("/")}
+      >
+        메인
+      </Button>
+
       <StyleDiv
         inStyle={{
           padding: "0px 10px 0px 10px",

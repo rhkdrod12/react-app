@@ -4,6 +4,8 @@ import { AuthRoutes } from "./utils/authorization.jsx";
 import Login from "./pages/user/login.jsx";
 import Join from "./pages/user/join.jsx";
 import { AnimatePresence, motion } from "framer-motion";
+import Loading from "./module/BasicComp/Loading.jsx";
+import { StableNavigateContextProvider } from "./module/BasicComp/StableNavigateContext";
 
 const AUTH_COMPONENTS = import.meta.glob(
   [
@@ -51,23 +53,39 @@ const PathRoutes = () => {
 
   return (
     <App>
-      <TransitionRouters>
-        <Route element={<AuthRoutes authorization={true} />}>
+      <StableNavigateContextProvider>
+        <TransitionRouters>
+          {/*<Route element={<AuthRoutes authorization={true} />}>*/}
           {auth_components.map(
             ({ path, component: Component = Fragment }, idx) => (
-              <Route key={path} path={path} element={<Component />} />
+              <Route
+                key={path}
+                path={path}
+                element={
+                  <AuthRoutes path={path}>
+                    <Component />
+                  </AuthRoutes>
+                }
+              />
             )
           )}
-        </Route>
-        <Route path="/" element={<Main />} />
-        <Route path={"/user/*"}>
-          <Route path="login" element={<Login />} />
-          <Route path="join" element={<Join />} />
-        </Route>
-        <Route path="*" element={<NotFound />} />
-      </TransitionRouters>
+          {/*</Route>*/}
+          <Route path="/" element={<Main />} />
+          <Route path={"/user/*"}>
+            <Route path="login" element={<Login />} />
+            <Route path="join" element={<Join />} />
+          </Route>
+          <Route path="*" element={<NotFound />} />
+        </TransitionRouters>
+      </StableNavigateContextProvider>
     </App>
   );
+};
+const TestDiv = ({ children }) => {
+  console.log("테스트 랜더링");
+  const authorization = false;
+
+  return;
 };
 
 const TransitionRouters = ({ children }) => {
@@ -77,6 +95,7 @@ const TransitionRouters = ({ children }) => {
       <motion.div
         className={"main-frame-wapper wh100"}
         key={location.key}
+        initial={animate.initial}
         animate={animate.animate}
         exit={animate.exit}
       >

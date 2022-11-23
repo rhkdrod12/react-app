@@ -6,6 +6,7 @@ import { ModalComponent, ModalProvider } from "./hook/useMessageModal.jsx";
 import { AxiosInterceptor } from "./utils/authorization";
 import React from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { StableNavigateContextProvider } from "./module/BasicComp/StableNavigateContext.jsx";
 
 const queryClient = new QueryClient({
   defaultOptions: {
