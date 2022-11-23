@@ -5,6 +5,15 @@ import { BrowserRouter } from "react-router-dom";
 import { ModalComponent, ModalProvider } from "./hook/useMessageModal.jsx";
 import { AxiosInterceptor } from "./utils/authorization";
 import React from "react";
+import { QueryClient, QueryClientProvider } from "react-query";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // window focus 설정
+    },
+  },
+});
 
 function App() {
   return (
@@ -12,9 +21,11 @@ function App() {
       <BrowserRouter basename="/">
         <ModalProvider>
           <AxiosInterceptor>
-            <Header />
-            <Content />
-            <Footer />
+            <QueryClientProvider client={queryClient}>
+              <Header />
+              <Content />
+              <Footer />
+            </QueryClientProvider>
             <ModalComponent />
           </AxiosInterceptor>
         </ModalProvider>

@@ -15,7 +15,7 @@ const HeaderMenu = () => {
 
   return (
     <div className="menu-container">
-      <DepthMenu menuList={menus} upperMenu={2} depth={1} />
+      <DepthMenu menuList={menus} upperMenu={1} depth={1} />
     </div>
   );
 };

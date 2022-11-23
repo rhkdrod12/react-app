@@ -7,7 +7,6 @@ import { COMPARE_STRING } from "../../hook/useDataListReducer.jsx";
 import { formatSizeUnits } from "../../utils/commonUtils.js";
 import { FILE_TRANS } from "../../utils/SystemCode.js";
 import { useInit, useReset } from "../../hook/useReset.jsx";
-
 const FileDownLoad = () => {
   const [files, setFiles] = useState([]);
 

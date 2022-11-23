@@ -16,6 +16,8 @@ export const Fade = ({
   style = {},
   fadeIn = "fadeIn",
   fadeOut = "fadeOut",
+  endEvent,
+  className,
 }) => {
   const [fade, setFade] = useState(true);
   const [show, setShow] = useState(false);
@@ -36,6 +38,7 @@ export const Fade = ({
   // fadeOut시 동작
   const onAnimationEnd = (event) => {
     if (show && ref.current == event.target && event.animationName == fadeOut) {
+      if (endEvent instanceof "function") endEvent();
       setShow(false);
     }
   };
@@ -46,10 +49,10 @@ export const Fade = ({
       ref={ref}
       inStyle={{
         transformOrigin: "top",
-        //animation: `${fade ? "0.16s " + fadeIn : "0.1s " + fadeOut} forwards`,
         animation: `${fade ? "2s " + fadeIn : "1s " + fadeOut} forwards`,
         ...style,
       }}
+      className={className}
       onAnimationEnd={onAnimationEnd}
     >
       {children}

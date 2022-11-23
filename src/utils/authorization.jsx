@@ -23,8 +23,10 @@ export const AuthRoutes = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [authorization, setAuthorization] = useState(false);
+  // const [authorization, setAuthorization] = useState(false);
+  const [authorization, setAuthorization] = useState(true);
   const [error, setError] = useState(false);
+
   console.log(location);
 
   const modalMessage = useMessageModal();
@@ -35,47 +37,47 @@ export const AuthRoutes = () => {
     });
   }, [location]);
 
-  useEffect(() => {
-    axios
-      .post(
-        `${DEFAULT_URL}/auth/access`,
-        { path: location.pathname },
-        {
-          headers: {
-            [COM.AUTHORIZATION]: Authorization.getAccessToken(),
-          },
-          withCredentials: true,
-          timeout: 3000,
-        }
-      )
-      .then((res) => {
-        console.log(res);
-        setAuthorization(res.data.result);
-      })
-      .catch((error) => {
-        const errorResult = axiosError(error);
-        setAuthorization(false);
-        if (
-          COM_MESSAGE.UNAUTHORIZED.resultCode == errorResult.resultCode ||
-          COM_MESSAGE.EXPIRE_AUTHORIZED.resultCode == errorResult.resultCode
-        ) {
-          // 권한없는 경우 로그인 알림창 후 로그인 화면으로 이동
-          modalMessage(axiosError(error).resultMessage, {
-            onSubmit: onMove,
-            onClose: onMove,
-          });
-        } else {
-          // 에러 메시지 출력
-          setError(true);
-          modalMessage(axiosError(error).resultMessage);
-        }
-      });
-
-    return () => {
-      setAuthorization(false);
-      setError(false);
-    };
-  }, [location.key]);
+  // useEffect(() => {
+  //   axios
+  //     .post(
+  //       `${DEFAULT_URL}/auth/access`,
+  //       { path: location.pathname },
+  //       {
+  //         headers: {
+  //           [COM.AUTHORIZATION]: Authorization.getAccessToken(),
+  //         },
+  //         withCredentials: true,
+  //         timeout: 3000,
+  //       }
+  //     )
+  //     .then((res) => {
+  //       console.log(res);
+  //       setAuthorization(res.data.result);
+  //     })
+  //     .catch((error) => {
+  //       const errorResult = axiosError(error);
+  //       setAuthorization(false);
+  //       if (
+  //         COM_MESSAGE.UNAUTHORIZED.resultCode == errorResult.resultCode ||
+  //         COM_MESSAGE.EXPIRE_AUTHORIZED.resultCode == errorResult.resultCode
+  //       ) {
+  //         // 권한없는 경우 로그인 알림창 후 로그인 화면으로 이동
+  //         modalMessage(axiosError(error).resultMessage, {
+  //           onSubmit: onMove,
+  //           onClose: onMove,
+  //         });
+  //       } else {
+  //         // 에러 메시지 출력
+  //         setError(true);
+  //         modalMessage(axiosError(error).resultMessage);
+  //       }
+  //     });
+  //
+  //   return () => {
+  //     setAuthorization(false);
+  //     setError(false);
+  //   };
+  // }, [location.key]);
 
   return authorization ? <Outlet /> : <Loading error={error} />;
 };
@@ -152,10 +154,8 @@ export class Authorization {
  * @constructor
  */
 export const AxiosInterceptor = ({ children }) => {
-  console.log("interceptor 동작1");
-  const navi = useNavigate();
-  // 기본 설정 지정
-  const inter = axiosRsInterceptor(navi);
+  // 현재의 navi로 기본 설정 지정
+  axiosRsInterceptor(useNavigate());
   return children;
 };
 

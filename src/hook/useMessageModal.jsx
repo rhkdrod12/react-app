@@ -45,7 +45,7 @@ export const ModalProvider = ({ children }) => {
  * @param {{type: String, onSubmit: function, onClose: function}} config  : 추가로 설정한 Config : { onSubmit, onClose }
  * @return {function(String, {type: String, onSubmit: function, onClose: function})}
  */
-const useMessageModal = (defaultConfig) => {
+const useMessageModal = (defaultConfig = null) => {
   const setParam = useContext(ModalsDispatchContext);
   return (message, config) =>
     setParam({ isOpen: true, message, config: config || defaultConfig });

@@ -3,6 +3,7 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import { AuthRoutes } from "./utils/authorization.jsx";
 import Login from "./pages/user/login.jsx";
 import Join from "./pages/user/join.jsx";
+import { AnimatePresence, motion } from "framer-motion";
 
 const AUTH_COMPONENTS = import.meta.glob(
   [
@@ -45,8 +46,9 @@ const PathRoutes = () => {
   const App = basics?.["_app"] || Fragment;
   const NotFound = basics?.["404"] || Fragment;
   const Main = basics?.["main"] || NotFound;
-  console.log(AUTH_COMPONENTS);
+
   console.log(auth_components);
+
   return (
     <App>
       <TransitionRouters>
@@ -70,26 +72,32 @@ const PathRoutes = () => {
 
 const TransitionRouters = ({ children }) => {
   const location = useLocation();
-  const [displayLocation, setDisplayLocation] = useState(location);
-  const [transitionStage, setTransistionStage] = useState("fadeIn");
-
-  useEffect(() => {
-    if (location !== displayLocation) setTransistionStage("fadeOut");
-  }, [location, displayLocation]);
-
   return (
-    <div
-      className={`${transitionStage} wh100 main-frame-wapper`}
-      onAnimationEnd={() => {
-        if (transitionStage === "fadeOut") {
-          setTransistionStage("fadeIn");
-          setDisplayLocation(location);
-        }
-      }}
-    >
-      <Routes location={displayLocation}>{children}</Routes>
-    </div>
+    <AnimatePresence mode={"wait"}>
+      <motion.div
+        className={"main-frame-wapper wh100"}
+        key={location.key}
+        animate={animate.animate}
+        exit={animate.exit}
+      >
+        <Routes location={location}>{children}</Routes>
+      </motion.div>
+    </AnimatePresence>
   );
+};
+
+const animate = {
+  initial: {
+    opacity: 0,
+  },
+  animate: {
+    opacity: 1,
+    transition: { property: "opacity", duration: 0.12 },
+  },
+  exit: {
+    opacity: 0,
+    transition: { property: "opacity", duration: 0.15 },
+  },
 };
 
 export default PathRoutes;
