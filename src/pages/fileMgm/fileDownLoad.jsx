@@ -108,11 +108,12 @@ const FileDownLoad = () => {
         <StyleDiv
           inStyle={{
             width: "100%",
-            height: "460px",
-            border: "1px solid white",
+            // height: "700px",
+            // border: "1px solid white",
             padding: 10,
-            background: "#f0f0f0",
+            // background: "#f0f0f0",
             marginTop: 10,
+            boxShadow: "0px 0px 3px 3px #ddd5d5",
           }}
         >
           {/*<GridComponent />*/}
@@ -353,7 +354,7 @@ const GridInfo = {
         event: { onClick: fileCheckBoxClick },
       },
     ],
-    Scroll: { visibleCount: 10 },
+    Scroll: { visibleCount: 12 },
   },
 };
 
