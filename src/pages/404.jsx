@@ -2,12 +2,14 @@ import React from "react";
 import { StyleDiv } from "../module/StyleComp/StyleComp";
 import { Button } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useStableNavigate } from "../module/BasicComp/StableNavigateContext.jsx";
+import { FadeDiv } from "../module/BasicComp/Fade.jsx";
 
 const NotFound = () => {
-  let navigate = useNavigate();
-  let locationStateLocation = useLocation();
+  // let locationStateLocation = useLocation();
+  const navigate = useStableNavigate();
 
-  console.log(locationStateLocation);
+  // console.log(locationStateLocation);
   return (
     <StyleDiv
       inStyle={{
@@ -34,7 +36,7 @@ const NotFound = () => {
           fontSize: "40px",
         }}
       >
-        {`${origin}${locationStateLocation.pathname}`}
+        {`${origin}${location.pathname}`}
       </StyleDiv>
 
       <Button
@@ -44,7 +46,21 @@ const NotFound = () => {
       >
         뒤로 돌아가기
       </Button>
-
+      <Button
+        variant="text"
+        sx={{ fontSize: "20px" }}
+        onClick={() => navigate("/")}
+      >
+        메인으로 이동
+      </Button>
+      <FadeDiv
+        animate={{
+          opacity: 1,
+          transition: { property: "opacity", duration: 5 },
+        }}
+      >
+        테스트 나타나는지
+      </FadeDiv>
       <a
         href="https://www.flaticon.com/free-icons/404-error"
         title="404 error icons"

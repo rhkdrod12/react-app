@@ -1,29 +1,10 @@
 import COM from "./System.js";
 import { COM_MESSAGE } from "./commonMessage.js";
-import {
-  Navigate,
-  Outlet,
-  Route,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
-import {
-  axiosError,
-  axiosInstance,
-  DEFAULT_URL,
-  usePostFetch,
-} from "../hook/useFetch.jsx";
-import React, {
-  Fragment,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { axiosError, axiosInstance, DEFAULT_URL } from "../hook/useFetch.jsx";
+import React, { Fragment, useCallback, useEffect, useState } from "react";
 import Loading from "../module/BasicComp/Loading.jsx";
 import axios from "axios";
-import System from "./System.js";
-import JSOG from "jsog";
 import useMessageModal from "../hook/useMessageModal.jsx";
 import { useStableNavigate } from "../module/BasicComp/StableNavigateContext.jsx";
 
@@ -33,13 +14,13 @@ export const isAuthorization = () => {
 };
 
 export const AuthRoutes = ({ children: Children, key, path }) => {
-  const location = useLocation();
-  const navigate = useNavigate();
+  // const location = useLocation();
+  // const navigate = useNavigate();
 
   //
   const modalMessage = useMessageModal();
-  // const navigate = useStableNavigate();
-  const [authorization, setAuthorization] = useState(false);
+  const navigate = useStableNavigate();
+  const [authorization, setAuthorization] = useState(true);
   // const [authorization, setAuthorization] = useState(true);
   const [error, setError] = useState(false);
 
@@ -65,24 +46,25 @@ export const AuthRoutes = ({ children: Children, key, path }) => {
       )
       .then((res) => {
         console.log(res);
-        setAuthorization(res.data.result);
+        // setAuthorization(res.data.result);
+        setAuthorization(true);
       })
       .catch((error) => {
-        const errorResult = axiosError(error);
+        const { resultCode, errorMessage } = axiosError(error);
         setAuthorization(false);
         if (
-          COM_MESSAGE.UNAUTHORIZED.resultCode == errorResult.resultCode ||
-          COM_MESSAGE.EXPIRE_AUTHORIZED.resultCode == errorResult.resultCode
+          COM_MESSAGE.UNAUTHORIZED.resultCode === resultCode ||
+          COM_MESSAGE.EXPIRE_AUTHORIZED.resultCode === resultCode
         ) {
           // 권한없는 경우 로그인 알림창 후 로그인 화면으로 이동
-          modalMessage(axiosError(error).resultMessage, {
+          modalMessage(errorMessage, {
             onSubmit: onMove,
             onClose: onMove,
           });
         } else {
           // 에러 메시지 출력
           setError(true);
-          modalMessage(axiosError(error).resultMessage);
+          modalMessage(errorMessage);
         }
       });
 

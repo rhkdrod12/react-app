@@ -41,6 +41,6 @@ export const COM_MESSAGE = {
   },
 
   isMessage: function (code) {
-    return this.getMessage(code) ? true : false;
+    return !!this.getMessage(code);
   },
 };

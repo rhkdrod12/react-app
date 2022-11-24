@@ -6,6 +6,7 @@ import Join from "./pages/user/join.jsx";
 import { AnimatePresence, motion } from "framer-motion";
 import Loading from "./module/BasicComp/Loading.jsx";
 import { StableNavigateContextProvider } from "./module/BasicComp/StableNavigateContext";
+import { FadeDiv } from "./module/BasicComp/Fade";
 
 const AUTH_COMPONENTS = import.meta.glob(
   [
@@ -55,7 +56,6 @@ const PathRoutes = () => {
     <App>
       <StableNavigateContextProvider>
         <TransitionRouters>
-          {/*<Route element={<AuthRoutes authorization={true} />}>*/}
           {auth_components.map(
             ({ path, component: Component = Fragment }, idx) => (
               <Route
@@ -69,7 +69,6 @@ const PathRoutes = () => {
               />
             )
           )}
-          {/*</Route>*/}
           <Route path="/" element={<Main />} />
           <Route path={"/user/*"}>
             <Route path="login" element={<Login />} />
@@ -81,42 +80,16 @@ const PathRoutes = () => {
     </App>
   );
 };
-const TestDiv = ({ children }) => {
-  console.log("테스트 랜더링");
-  const authorization = false;
-
-  return;
-};
 
 const TransitionRouters = ({ children }) => {
   const location = useLocation();
   return (
     <AnimatePresence mode={"wait"}>
-      <motion.div
-        className={"main-frame-wapper wh100"}
-        key={location.key}
-        initial={animate.initial}
-        animate={animate.animate}
-        exit={animate.exit}
-      >
+      <FadeDiv className={"main-frame-wapper wh100"} key={location.key}>
         <Routes location={location}>{children}</Routes>
-      </motion.div>
+      </FadeDiv>
     </AnimatePresence>
   );
-};
-
-const animate = {
-  initial: {
-    opacity: 0,
-  },
-  animate: {
-    opacity: 1,
-    transition: { property: "opacity", duration: 0.12 },
-  },
-  exit: {
-    opacity: 0,
-    transition: { property: "opacity", duration: 0.15 },
-  },
 };
 
 export default PathRoutes;

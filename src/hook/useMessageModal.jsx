@@ -16,8 +16,12 @@ import { Fade } from "../module/BasicComp/Fade.jsx";
 import { StyleDiv } from "../module/StyleComp/StyleComp";
 
 /**
- *
- * @type {{ERROR: string, ALERT: string, CONFIRM: string}}
+ * 모달 타입
+ * @readonly
+ * @enum {string}
+ * @property {String} CONFIRM 확인 모달창인 경우
+ * @property {String} ALERT   알림 모달창인 경우
+ * @property {String} ERROR   에러 모달창인 경우
  */
 export const MODAL_TYPE = {
   CONFIRM: "확 인", // 확인
@@ -40,13 +44,26 @@ export const ModalProvider = ({ children }) => {
 };
 
 /**
- * MessageModal창을 활성화 시키는 함수를 반환하는 훅
- * @param type    : ALERT, CONFIRM, ERROR
- * @param message : 표기할 메시지
- * @param {{type: String, onSubmit: function, onClose: function}} config  : 추가로 설정한 Config : { onSubmit, onClose }
- * @return {function(String, {type: String, onSubmit: function, onClose: function})}
+ * 모달을 설정객체
+ * @typedef {Object} modalConfig
+ * @property {String} [type] MODAL_TYPE(CONFIRM, ALERT, ERROR)
+ * @property {Function} [onSubmit] - 확인 클릭시 동작할 콜백함수
+ * @property {Function} [onClose] - 닫기 클릭시 동작할 콜백함수
  */
-const useMessageModal = (defaultConfig = null) => {
+/**
+ * 모달을 입력한 메시지로 호출하는 함수
+ * @callback modalFunction
+ * @param {String} message 모달에 출력할 메시지
+ * @param {modalConfig} [config] 모달 설정 객체
+ */
+/**
+ * MessageModal창을 활성화 시키는 함수를 반환하는 hook
+ * @function useMessageModal
+ * @param {modalConfig} [defaultConfig] 모달 설정
+ * @returns {modalFunction}
+ */
+const useMessageModal = (defaultConfig) => {
+  /** @type {function} */
   const setParam = useContext(ModalsDispatchContext);
   return useCallback(
     (message, config) =>
@@ -55,10 +72,17 @@ const useMessageModal = (defaultConfig = null) => {
   );
 };
 
+/**
+ * 모달 컴포넌트
+ * 최상위쪽에 선언되어있어 전역에서 사용할 수 있도록 하였음
+ * useMessageModal을 통해 선언하고 반환된 함수를 사용하여 모달을 호출
+ * @returns {JSX.Element}
+ * @constructor
+ */
 export const ModalComponent = () => {
   const { isOpen = false, message, config } = useContext(ModalsStateContext);
+  /** @type {function} */
   const setParam = useContext(ModalsDispatchContext);
-
   const { onSubmit, onClose, type = MODAL_TYPE.ALERT } = config || {};
 
   const onDefaultSubmit = () => {
@@ -221,7 +245,6 @@ const theme = createTheme({
     },
   },
 });
-
 const ModalOverlay = styled.div`
   position: fixed;
   width: 100%;
@@ -229,7 +252,6 @@ const ModalOverlay = styled.div`
   background: rgba(0, 0, 0, 0.15);
   z-index: 99;
 `;
-
 const ModalContainer = styled(MoveContainer)`
   position: absolute;
   //top: 50%;
@@ -240,7 +262,6 @@ const ModalContainer = styled(MoveContainer)`
   //min-height: 300px;
   //max-height: 600px;
 `;
-
 const ModalWarp = styled.div`
   width: 100%;
   height: 100%;
@@ -252,7 +273,6 @@ const ModalWarp = styled.div`
   box-shadow: 0px 0px 1px 1px rgb(0 0 0 / 20%), 0px 0px 2px 2px rgb(0 0 0 / 14%),
     0px 0px 5px 3px rgb(0 0 0 / 12%);
 `;
-
 const ModalTitle = styled.div`
   display: grid;
   align-content: center;
@@ -275,7 +295,6 @@ const ModalContent = styled.div`
   align-content: center;
   min-height: 100px;
 `;
-
 const ModalBottom = styled.div`
   display: grid;
   grid-auto-flow: column;

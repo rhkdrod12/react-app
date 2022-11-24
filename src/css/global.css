@@ -3,16 +3,13 @@
   padding: 0;
   margin: 0;
 }
-
 .wh100{
   width: 100%;
   height: 100%;
 }
-
 .fadeIn {
   animation: 0.16s fadeIn forwards;
 }
-
 .fadeOut {
   animation: 0.11s fadeOut forwards;
 }
@@ -25,7 +22,6 @@
     opacity: 1;
   }
 }
-
 @keyframes fadeOut {
   from {
     opacity: 1;
@@ -34,7 +30,6 @@
     opacity: 0;
   }
 }
-
 @keyframes fadeZoomIn {
   from {
     transform: scale(0);
@@ -45,7 +40,6 @@
     opacity: 1;
   }
 }
-
 @keyframes fadeZoomOut {
   from {
     transform: scale(1);

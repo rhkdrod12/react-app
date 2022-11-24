@@ -4,10 +4,13 @@ import "/src/css/global.css";
 import { AnimatePresence, motion } from "framer-motion";
 /**
  * Fade 컴포넌트 자식 컴포넌트를 출력할 떄 fade in, out을 실시함
+ * @param children
  * @param {boolean} state on/off
  * @param {Object} style style
  * @param {String} fadeIn fadeIn을 실시할 애니메이션(global.css에 작성)
  * @param {String }fadeOut fadeOut을 실시할 애니메이션(global.css에 작성)
+ * @param endEvent
+ * @param className
  * @return {JSX.Element|null}
  * @constructor
  */
@@ -38,7 +41,11 @@ export const Fade = ({
 
   // fadeOut시 동작
   const onAnimationEnd = (event) => {
-    if (show && ref.current == event.target && event.animationName == fadeOut) {
+    if (
+      show &&
+      ref.current === event.target &&
+      event.animationName === fadeOut
+    ) {
       if (endEvent instanceof "function") endEvent();
       setShow(false);
     }
@@ -61,21 +68,18 @@ export const Fade = ({
   ) : null;
 };
 
-export const FadeDiv = ({ children, className, ...param }) => {
-  return (
-    <motion.div
-      className={className}
-      initial={animate.initial}
-      animate={animate.animate}
-      exit={animate.exit}
-      {...param}
-    >
-      {children}
-    </motion.div>
-  );
+/**
+ * 모션 모드
+ * @readonly
+ * @type {{wait: string, popLayout: string, sync: string}}
+ */
+const MotionMode = {
+  POP_LAYOUT: "popLayout",
+  WAIT: "wait",
+  SYNC: "sync",
 };
 
-const animate = {
+const DefaultAnimate = {
   initial: {
     opacity: 0,
   },
@@ -87,4 +91,31 @@ const animate = {
     opacity: 0,
     transition: { property: "opacity", duration: 0.15 },
   },
+};
+
+export const FadeDiv = ({
+  children,
+  mode = MotionMode.WAIT,
+  className,
+  initial,
+  animate,
+  exit,
+  ...param
+}) => {
+  const modalDiv = (
+    <motion.div
+      className={className}
+      initial={initial || DefaultAnimate.initial}
+      animate={animate || DefaultAnimate.animate}
+      exit={exit || DefaultAnimate.exit}
+      {...param}
+    >
+      {children}
+    </motion.div>
+  );
+  if (mode !== MotionMode.WAIT) {
+    return <AnimatePresence mode={mode}>{modalDiv}</AnimatePresence>;
+  } else {
+    return modalDiv;
+  }
 };

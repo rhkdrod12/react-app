@@ -14,12 +14,14 @@ const StableNavigateContextProvider = ({ children }) => {
   );
 };
 
+/**
+ * useNavigate
+ * @returns {useNavigate}
+ */
 const useStableNavigate = () => {
   const navigateRef = useContext(StableNavigateContext);
   if (navigateRef.current === null)
     throw new Error("StableNavigate context is not initialized");
-  console.log(navigateRef);
-
   return navigateRef.current;
 };
 
