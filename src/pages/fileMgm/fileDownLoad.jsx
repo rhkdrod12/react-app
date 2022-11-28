@@ -7,14 +7,15 @@ import { COMPARE_STRING } from "../../hook/useDataListReducer.jsx";
 import { formatSizeUnits } from "../../utils/commonUtils.js";
 import { FILE_TRANS } from "../../utils/SystemCode.js";
 import { useInit, useReset } from "../../hook/useReset.jsx";
+import useMessageModal from "../../hook/useMessageModal.jsx";
 const FileDownLoad = () => {
   const [files, setFiles] = useState([]);
+  const modalMessage = useMessageModal();
 
   useInit(() => {
-    console.log("여기 render");
-    getFetch("/api/getFileList", { page: 1, pageCount: 999 }).then((result) =>
-      setFiles(result)
-    );
+    getFetch("/api/getFileList", { page: 1, pageCount: 999 })
+      .then((result) => setFiles(result))
+      .catch((error) => modalMessage(error.resultMessage));
   });
 
   useReset(() => {

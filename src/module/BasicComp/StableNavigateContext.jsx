@@ -16,7 +16,7 @@ const StableNavigateContextProvider = ({ children }) => {
 
 /**
  * useNavigate
- * @returns {useNavigate}
+ * @returns {function(string, {state?:Object, replace?: boolean}?)}
  */
 const useStableNavigate = () => {
   const navigateRef = useContext(StableNavigateContext);

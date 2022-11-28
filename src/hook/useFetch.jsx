@@ -81,7 +81,7 @@ export function usePostFetch(url, data, stateType = []) {
  * @param url
  * @param param
  * @param callback
- * @returns {Promise<unknown>}
+ * @returns {Promise<Object> | Promise<AxiosResponse>}
  */
 export function getFetch(url, param, callback) {
   url = DEFAULT_URL + url;
@@ -96,7 +96,6 @@ export function getFetch(url, param, callback) {
         resolve(JSOG.parse(res.request.response).result, res);
       })
       .catch((error) => {
-        console.log(axiosError(error));
         reject(axiosError(error));
       });
   });
@@ -315,7 +314,7 @@ export const makeGetParam = (url, param) => {
  */
 export const axiosRxJsError = (observer, error) => {
   if (error.code) {
-    if (error.name == "AxiosError") {
+    if (error.name == "AxiosResponse") {
       if (error.code == "ERR_NETWORK") {
         observer.error({ result: false, ...COM_MESSAGE.ERR_NETWORK });
       } else if (error.code == "ERR_BAD_RESPONSE") {
@@ -334,8 +333,16 @@ export const axiosRxJsError = (observer, error) => {
 };
 
 /**
+ * @typedef {Object} AxiosResponse
+ * @property {Object} result
+ * @property {string} resultCode
+ * @property {string} resultMessage
+ */
+
+/**
  * axios 통신시 발생하는 에러메시지 처리
  * @param {*} error
+ * @returns {AxiosResponse}
  */
 export const axiosError = (error) => {
   if (error.code) {

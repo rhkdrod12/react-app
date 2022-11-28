@@ -8,71 +8,74 @@ import axios from "axios";
 import useMessageModal from "../hook/useMessageModal.jsx";
 import { useStableNavigate } from "../module/BasicComp/StableNavigateContext.jsx";
 
-export const isAuthorization = () => {
-  const token = sessionStorage.getItem(COM.ACCESS_TOKEN);
-  // 이걸 인증서버에서 값을 받는게 맞는 것인가..?
-};
+const test = true;
 
+/**
+ * 인증용 라우터
+ * 해당 경로로 이동시키기전에 서버에서 액세스 토큰의 값을 검증하여 이동 가능 여부를 확인하는 라우터
+ * @param Children
+ * @param key
+ * @param path
+ * @returns {JSX.Element}
+ * @constructor
+ */
 export const AuthRoutes = ({ children: Children, key, path }) => {
-  // const location = useLocation();
-  // const navigate = useNavigate();
-
-  //
   const modalMessage = useMessageModal();
   const navigate = useStableNavigate();
-  const [authorization, setAuthorization] = useState(true);
-  // const [authorization, setAuthorization] = useState(true);
+  const [authorization, setAuthorization] = useState(false);
   const [error, setError] = useState(false);
 
   console.log("인증 라우터 %o", path);
-  const onMove = useCallback(() => {
-    navigate("/user/login", {
-      state: { prePath: location.pathname },
-    });
-  }, [location]);
+
+  // 로그인 화면으로 이동 이벤트
+  const onMoveLogin = useCallback(() => {
+    navigate("/user/login", { state: { prePath: path } });
+  }, [path]);
+
+  if (test) {
+    return <Fragment>{Children}</Fragment>;
+  }
 
   useEffect(() => {
     axios
       .post(
         `${DEFAULT_URL}/auth/access`,
-        { path: location.pathname },
+        { path: path },
         {
           headers: {
             [COM.AUTHORIZATION]: Authorization.getAccessToken(),
           },
           withCredentials: true,
-          timeout: 3000,
+          timeout: COM.TIME_OUT,
         }
       )
       .then((res) => {
-        console.log(res);
-        // setAuthorization(res.data.result);
         setAuthorization(true);
       })
       .catch((error) => {
-        const { resultCode, errorMessage } = axiosError(error);
+        const { resultCode, resultMessage } = axiosError(error);
         setAuthorization(false);
         if (
           COM_MESSAGE.UNAUTHORIZED.resultCode === resultCode ||
           COM_MESSAGE.EXPIRE_AUTHORIZED.resultCode === resultCode
         ) {
           // 권한없는 경우 로그인 알림창 후 로그인 화면으로 이동
-          modalMessage(errorMessage, {
-            onSubmit: onMove,
-            onClose: onMove,
+          modalMessage(resultMessage, {
+            onSubmit: onMoveLogin,
+            onClose: onMoveLogin,
           });
         } else {
           // 에러 메시지 출력
           setError(true);
-          modalMessage(errorMessage);
+          modalMessage(resultMessage);
         }
       });
 
     return () => {
-      setAuthorization(false);
       setError(false);
+      setAuthorization(false);
     };
-  }, [location.key]);
+  }, [key]);
 
   return (
     <Fragment>{authorization ? Children : <Loading error={error} />}</Fragment>
@@ -83,8 +86,8 @@ export class Authorization {
   /**
    * 인증 토큰을 세션스토리지에 저장 및 Header에 지정
    * 갱신 토큰을 로컬스토리지에 저장
-   * @param accessToken
-   * @param refreshToken
+   * @param {string} accessToken
+   * @param {string} refreshToken
    */
   static setToken({ accessToken, refreshToken }) {
     // 인증 토큰 셋
@@ -99,14 +102,17 @@ export class Authorization {
    * 인증 토큰을 세션스토리지에서 제거 및 Header에서 제거
    */
   static deleteToken() {
+    // 액세스 토큰 제거
     sessionStorage.removeItem(COM.ACCESS_TOKEN);
+    // 리플래쉬 토큰 제거
     localStorage.removeItem(COM.REFRESH_TOKEN);
+    // 인증 헤더 제거
     delete axiosInstance.defaults.headers.common[COM.AUTHORIZATION];
   }
 
   /**
    * 인증 토큰을 헤더와 세션 스토리지에 저장(일단 )
-   * @param accessToken
+   * @param {string} accessToken
    */
   static setAccessToken(accessToken) {
     // 인증 토큰 셋
@@ -117,7 +123,7 @@ export class Authorization {
 
   /**
    * 갱신 토큰을 로컬 스토리지에 저장
-   * @param refreshToken
+   * @param {string} refreshToken
    */
   static setRefreshToken(refreshToken) {
     // 갱신 토큰 셋
@@ -177,13 +183,12 @@ const axiosRsInterceptor = (navigate) => {
         sessionStorage.removeItem(COM.ACCESS_TOKEN);
         // 리플래쉬 토큰 삭제
         sessionStorage.removeItem(COM.REFRESH_TOKEN);
-
+        // 로그인 화면으로 이동처리(현재 path정보를 가지고 이동시킴)
         navigate("/user/login", {
-          state: {
-            movePath: location.pathname,
-          },
+          state: { movePath: location.pathname },
           replace: true,
         });
+        // promise 제거처리
         return new Promise(() => {});
       }
       // 토큰 만료 상태 - refreshToken으로 재요청
@@ -194,10 +199,12 @@ const axiosRsInterceptor = (navigate) => {
         console.log("토큰 갱신 요청 필요");
         // 엑세스 토큰 삭제 - 갱신은 요청하더라도 일단 액세스 토큰은 삭제처리
         sessionStorage.removeItem(COM.ACCESS_TOKEN);
+        // 에러 처리
         return Promise.reject(error);
       }
       // 그냥 에러
       else {
+        // 에러 처리
         return Promise.reject(error);
       }
     }
