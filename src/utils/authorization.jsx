@@ -8,7 +8,7 @@ import axios from "axios";
 import useMessageModal from "../hook/useMessageModal.jsx";
 import { useStableNavigate } from "../module/BasicComp/StableNavigateContext.jsx";
 
-const test = true;
+const test = false;
 
 /**
  * 인증용 라우터
@@ -57,7 +57,8 @@ export const AuthRoutes = ({ children: Children, key, path }) => {
         setAuthorization(false);
         if (
           COM_MESSAGE.UNAUTHORIZED.resultCode === resultCode ||
-          COM_MESSAGE.EXPIRE_AUTHORIZED.resultCode === resultCode
+          COM_MESSAGE.EXPIRE_AUTHORIZED.resultCode === resultCode ||
+          COM_MESSAGE.NOT_EXIST_AUTH.resultCode === resultCode
         ) {
           // 권한없는 경우 로그인 알림창 후 로그인 화면으로 이동
           modalMessage(resultMessage, {
@@ -146,7 +147,7 @@ export class Authorization {
   }
 
   static getAccessToken() {
-    return sessionStorage.getItem(COM.ACCESS_TOKEN);
+    return sessionStorage.getItem(COM.ACCESS_TOKEN) || "";
   }
 }
 

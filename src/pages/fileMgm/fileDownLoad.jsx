@@ -8,6 +8,7 @@ import { formatSizeUnits } from "../../utils/commonUtils.js";
 import { FILE_TRANS } from "../../utils/SystemCode.js";
 import { useInit, useReset } from "../../hook/useReset.jsx";
 import useMessageModal from "../../hook/useMessageModal.jsx";
+
 const FileDownLoad = () => {
   const [files, setFiles] = useState([]);
   const modalMessage = useMessageModal();
@@ -32,7 +33,7 @@ const FileDownLoad = () => {
     () => (event) => {
       const resultData = rowAction
         .getRowAllData()
-        .filter((val) => val.check == "1")
+        .filter((val) => val.check === "1")
         .reduce(
           (acc, val) => {
             acc.rowIndex.push(val.rowIndex);
@@ -75,9 +76,9 @@ const FileDownLoad = () => {
   );
 
   const onKeyUp = (event) => {
-    if (event.keyCode == "13") {
+    if (event.keyCode === "13") {
       const value = event.target.value;
-      if (value == "") {
+      if (value === "") {
         rowAction.clearRowFilter();
       } else {
         rowAction.setRowFilter(
@@ -109,10 +110,7 @@ const FileDownLoad = () => {
         <StyleDiv
           inStyle={{
             width: "100%",
-            // height: "700px",
-            // border: "1px solid white",
             padding: 10,
-            // background: "#f0f0f0",
             marginTop: 10,
             boxShadow: "0px 0px 3px 3px #ddd5d5",
           }}
@@ -125,21 +123,10 @@ const FileDownLoad = () => {
   );
 };
 
-const rowSelectEvent = (event, { id, rowIdx, rowAction }) => {
-  const rowData = rowAction.getRowData(rowIdx);
-  // if (!rowData.fileTransYn) {
-  //   if (rowData.check == "1") {
-  //     rowAction.setColumnData(rowIdx, { check: "0" });
-  //   } else {
-  //     rowAction.setColumnData(rowIdx, { check: "1" });
-  //   }
-  // }
-};
-
 // 파일 다운로드 이벤트
 const fileDownloadEvent = (event, { id, rowIdx, rowAction }) => {
   const rowData = rowAction.getRowData(rowIdx);
-  if (id != "check" && !rowData.fileTransYn) {
+  if (id !== "check" && !rowData.fileTransYn) {
     const progress = (process) => {
       const percent = ((process.loaded * 100) / rowData.fileByte).toFixed(2);
       rowAction.setColumnData(rowIdx, {
@@ -164,7 +151,7 @@ const fileDownloadEvent = (event, { id, rowIdx, rowAction }) => {
 const fileCheckBoxClick = (event, { id, data, rowIdx, rowAction }) => {
   event.stopPropagation();
   rowAction.setColumnData(rowIdx, {
-    check: data == null || data == "0" ? "1" : "0",
+    check: data == null || data === "0" ? "1" : "0",
   });
 };
 
