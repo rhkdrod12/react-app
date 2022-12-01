@@ -78,7 +78,7 @@ export function usePostFetch(url, data, stateType = []) {
 
 /**
  * url에 param을 get형태로 전송 또는 요청
- * @param url
+ * @param {string} url
  * @param param
  * @param callback
  * @returns {Promise<Object> | Promise<AxiosResponse>}
@@ -282,8 +282,8 @@ export function fileDownload(url, param, onDownloadProgress) {
 
 /**
  * param을 formData로 변환
- * @param arg
- * @param exclude
+ * @param {Object} arg
+ * @param {Array<String>} [exclude]
  * @returns {FormData}
  */
 export const makeFormData = function (arg, exclude = []) {

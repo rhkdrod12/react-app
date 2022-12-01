@@ -40,37 +40,37 @@ export const COM_MESSAGE = {
     resultCode: "EPUC04",
     resultMessage: "존재하지 않는 사용자입니다.",
   },
-  NOT_EXIST_AUTH: {
-    resultCode: "EPUC05",
-    resultMessage: "인증정보가 존재하지 않습니다.",
-  },
   MISMATCH_USEID: {
-    resultCode: "EPUC06",
+    resultCode: "EPUC05",
     resultMessage: "아이디가 일치하지 않습니다.",
   },
   MISMATCH_PASSWORD: {
-    resultCode: "EPUC07",
+    resultCode: "EPUC06",
     resultMessage: "비밀번호가 일치하지 않습니다.",
   },
   MISMATCH_USER: {
-    resultCode: "EPUC08",
+    resultCode: "EPUC07",
     resultMessage: "아이디가 존재하지 않거나 비밀번호가 일치하지 않습니다.",
   },
   UNAUTHORIZED: {
-    resultCode: "ECUC09",
+    resultCode: "ECUC08",
     resultMessage: "인증되지 않은 사용자입니다.",
   },
   INVALID_AUTHORIZED: {
-    resultCode: "ECUC10",
+    resultCode: "ECUC09",
     resultMessage: "유효하지 않은 인증정보입니다.",
   },
   EXPIRE_AUTHORIZED: {
-    resultCode: "ECUC11",
+    resultCode: "ECUC10",
     resultMessage: "만료된 인증정보입니다.",
   },
   ACCESS_DENIED: {
-    resultCode: "ECUC12",
+    resultCode: "ECUC11",
     resultMessage: "접근 권한이 없습니다",
+  },
+  NOT_EXIST_AUTH: {
+    resultCode: "ECU12",
+    resultMessage: "인증정보가 존재하지 않습니다.",
   },
 
   /**

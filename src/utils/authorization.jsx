@@ -1,7 +1,12 @@
 import COM from "./System.js";
 import { COM_MESSAGE } from "./commonMessage.js";
 import { useLocation, useNavigate } from "react-router-dom";
-import { axiosError, axiosInstance, DEFAULT_URL } from "../hook/useFetch.jsx";
+import {
+  axiosError,
+  axiosInstance,
+  DEFAULT_URL,
+  makeFormData,
+} from "../hook/useFetch.jsx";
 import React, { Fragment, useCallback, useEffect, useState } from "react";
 import Loading from "../module/BasicComp/Loading.jsx";
 import axios from "axios";
@@ -25,7 +30,7 @@ export const AuthRoutes = ({ children: Children, key, path }) => {
   const [authorization, setAuthorization] = useState(false);
   const [error, setError] = useState(false);
 
-  console.log("인증 라우터 %o", path);
+  console.log("인증 라우터 %o %o", path, authorization);
 
   // 로그인 화면으로 이동 이벤트
   const onMoveLogin = useCallback(() => {
@@ -57,18 +62,33 @@ export const AuthRoutes = ({ children: Children, key, path }) => {
         setAuthorization(false);
         if (
           COM_MESSAGE.UNAUTHORIZED.resultCode === resultCode ||
-          COM_MESSAGE.EXPIRE_AUTHORIZED.resultCode === resultCode ||
           COM_MESSAGE.NOT_EXIST_AUTH.resultCode === resultCode
         ) {
-          // 권한없는 경우 로그인 알림창 후 로그인 화면으로 이동
-          modalMessage(resultMessage, {
+          modalMessage("로그인이 필요한 서비스입니다.", {
             onSubmit: onMoveLogin,
             onClose: onMoveLogin,
           });
+        } else if (COM_MESSAGE.EXPIRE_AUTHORIZED.resultCode === resultCode) {
+          rePublishAccessToken()
+            .then((res) => {
+              const accessToken = res.data.result.accessToken;
+              // 인증 토큰 갱신
+              Authorization.setAccessToken(accessToken);
+              setAuthorization(true);
+            })
+            .catch((error) => {
+              // 토큰 정보 삭제
+              Authorization.deleteToken();
+              setAuthorization(false);
+              // 에러 메시지 출력
+              modalMessage("인증 정보가 만료되어 재로그인이 필요합니다.", {
+                onSubmit: onMoveLogin,
+                onClose: onMoveLogin,
+              });
+            });
         } else {
-          // 에러 메시지 출력
           setError(true);
-          modalMessage(resultMessage);
+          modalMessage(COM_MESSAGE.ERR.resultMessage);
         }
       });
 
@@ -80,6 +100,22 @@ export const AuthRoutes = ({ children: Children, key, path }) => {
 
   return (
     <Fragment>{authorization ? Children : <Loading error={error} />}</Fragment>
+  );
+};
+
+const rePublishAccessToken = () => {
+  const accessToken = Authorization.getAccessToken();
+  const refreshToken = Authorization.getRefreshToken();
+
+  return axios.post(
+    `${DEFAULT_URL}/auth/refreshToken`,
+    makeFormData({
+      accessToken,
+      refreshToken,
+    }),
+    {
+      headers: { "Content-type": "multipart/form-data" },
+    }
   );
 };
 
@@ -146,8 +182,20 @@ export class Authorization {
     localStorage.removeItem(COM.REFRESH_TOKEN);
   }
 
+  /**
+   * 접근 토큰 요청
+   * @returns {string|string}
+   */
   static getAccessToken() {
     return sessionStorage.getItem(COM.ACCESS_TOKEN) || "";
+  }
+
+  /**
+   * 갱신 토큰 요청
+   * @returns {string|string}
+   */
+  static getRefreshToken() {
+    return localStorage.getItem(COM.REFRESH_TOKEN) || "";
   }
 }
 
@@ -177,7 +225,7 @@ const axiosRsInterceptor = (navigate) => {
     (error) => {
       const errorResult = axiosError(error);
       // 미인증 상태
-      if (errorResult.resultCode == COM_MESSAGE.UNAUTHORIZED.resultCode) {
+      if (errorResult.resultCode === COM_MESSAGE.UNAUTHORIZED.resultCode) {
         // 로그인 요청 화면 또는 거부 화면처리
         console.log("미인증 상태 %o", location.pathname);
         // 엑세스 토큰 삭제
@@ -194,7 +242,7 @@ const axiosRsInterceptor = (navigate) => {
       }
       // 토큰 만료 상태 - refreshToken으로 재요청
       else if (
-        errorResult.resultCode == COM_MESSAGE.EXPIRE_AUTHORIZED.resultCode
+        errorResult.resultCode === COM_MESSAGE.EXPIRE_AUTHORIZED.resultCode
       ) {
         // 토큰 갱신 요청, refreshToken이 있는 경우에만
         console.log("토큰 갱신 요청 필요");
